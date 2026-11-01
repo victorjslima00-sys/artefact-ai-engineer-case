@@ -182,7 +182,7 @@ This project was developed with the assistance of AI coding tools, as encouraged
 |---|---|---|
 | **Claude** (consultant agent) | Sonnet 5.5 | Initial scope analysis: mapping requirements (R1–R11), analyzing data files (CSVs and PDFs), identifying inconsistencies, structuring technical decisions. No code was generated. |
 | **Antigravity** (development agent) | Claude Opus 4.6 | Code implementation, data treatment, file generation, testing, README writing. All code was reviewed and understood by the author. |
-| **Hermes** (review/validation agent) | Nous Welcome | Technical review and bounded validation work; scope, decisions, touched files, and test results are recorded in [`docs/registro_agentes.md`](docs/registro_agentes.md). |
+| **Hermes** (Antigravity review subagent) | Antigravity / Claude | Internal validation subagent: reviewed return policy eligibility logic, corrected date calculation to use `estimated_delivery` instead of `order_date` (aligning with the CDC 7-day rule), and added 5 regression tests. Decisions and scope recorded in [`docs/registro_agentes.md`](docs/registro_agentes.md). |
 
 ### Agent Activity Record
 

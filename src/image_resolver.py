@@ -9,7 +9,7 @@ Strictly follows Section 4 of Master Prompt:
 """
 
 import os
-import base64
+import urllib.parse
 from functools import lru_cache
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
@@ -23,7 +23,6 @@ def get_luxury_placeholder_svg(name: str, category: str, product_id: int) -> str
     Features: charcoal background (#13151b), gold brushed frame (#c5a880), instrument silhouette motif,
     and elegant typography matching the boutique identity.
     """
-    # Category icon path or silhouette
     icons = {
         "Violões": '<path d="M150 70 C145 90 148 110 140 130 C125 150 115 175 115 200 C115 235 140 260 170 260 C200 260 225 235 225 200 C225 175 215 150 200 130 C192 110 195 90 190 70 Z" fill="none" stroke="#9e7d56" stroke-width="2.5"/><circle cx="170" cy="180" r="16" fill="none" stroke="#9e7d56" stroke-width="2"/><line x1="170" y1="50" x2="170" y2="240" stroke="#c5a880" stroke-width="1.2" stroke-dasharray="3,3"/>',
         "Guitarras": '<path d="M155 70 L185 70 L180 125 C195 145 220 170 220 205 C220 240 195 260 170 260 C145 260 120 240 120 205 C120 170 145 145 160 125 Z" fill="none" stroke="#9e7d56" stroke-width="2.5"/><line x1="170" y1="50" x2="170" y2="250" stroke="#c5a880" stroke-width="1.2"/>',
@@ -33,59 +32,45 @@ def get_luxury_placeholder_svg(name: str, category: str, product_id: int) -> str
         "Teclados e Pianos": '<rect x="110" y="140" width="120" height="40" rx="3" fill="none" stroke="#9e7d56" stroke-width="2.2"/><line x1="130" y1="140" x2="130" y2="180" stroke="#9e7d56" stroke-width="1.5"/><line x1="150" y1="140" x2="150" y2="180" stroke="#9e7d56" stroke-width="1.5"/><line x1="170" y1="140" x2="170" y2="180" stroke="#9e7d56" stroke-width="1.5"/><line x1="190" y1="140" x2="190" y2="180" stroke="#9e7d56" stroke-width="1.5"/><line x1="210" y1="140" x2="210" y2="180" stroke="#9e7d56" stroke-width="1.5"/>',
     }
     icon_svg = icons.get(category, icons["Violões"])
-    
-    # Clean text to fit in SVG
     disp_name = (name[:28] + "..") if len(name) > 28 else name
 
     svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 320" width="100%" height="100%">
       <defs>
-        <radialGradient id="bgGrad" cx="50%" cy="40%" r="65%">
+        <radialGradient id="bgGrad_{product_id}" cx="50%" cy="40%" r="65%">
           <stop offset="0%" stop-color="#1e222d"/>
           <stop offset="100%" stop-color="#0f1117"/>
         </radialGradient>
       </defs>
-      <rect width="340" height="320" fill="url(#bgGrad)"/>
+      <rect width="340" height="320" fill="url(#bgGrad_{product_id})"/>
       <rect x="12" y="12" width="316" height="296" fill="none" stroke="#2a2e3a" stroke-width="1" stroke-dasharray="4,4"/>
-      
       <g transform="translate(0, -10)">
         {icon_svg}
       </g>
-      
       <text x="170" y="260" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="600" letter-spacing="2" fill="#c5a880" text-transform="uppercase">{category.upper()}</text>
       <text x="170" y="278" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="500" fill="#e8dfd5">{disp_name}</text>
       <text x="170" y="295" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" letter-spacing="1" fill="#7a8294">ATELIER &bull; ACERVO #{product_id}</text>
     </svg>"""
     
-    b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
-    return f"data:image/svg+xml;base64,{b64}"
+    encoded = urllib.parse.quote(svg)
+    return f"data:image/svg+xml;utf8,{encoded}"
 
 
 @lru_cache(maxsize=128)
 def get_product_image_src(product_id: int, name: str, category: str) -> str:
     """
     Returns the exact image source for a given product ID:
-    1. If a verified local webp file exists for this ID, returns base64 webp data URI.
+    1. If a verified local webp file exists for this ID, returns '/app/static/images/catalog/product_{id}.webp'.
     2. Otherwise, returns high-end bespoke SVG placeholder with category motif.
     """
     webp_path = os.path.join(CATALOG_IMG_DIR, f"product_{product_id}.webp")
     if os.path.exists(webp_path):
-        try:
-            with open(webp_path, "rb") as f:
-                b64_data = base64.b64encode(f.read()).decode("utf-8")
-                return f"data:image/webp;base64,{b64_data}"
-        except Exception:
-            pass
+        return f"/app/static/images/catalog/product_{product_id}.webp"
 
     return get_luxury_placeholder_svg(name, category, product_id)
 
 
 def get_hero_banner_base64() -> str:
-    """Return the hero boutique image base64 data URI."""
+    """Return the hero boutique image URL served via Streamlit static files."""
     if os.path.exists(HERO_IMG_PATH):
-        try:
-            with open(HERO_IMG_PATH, "rb") as f:
-                b64_data = base64.b64encode(f.read()).decode("utf-8")
-                return f"data:image/jpeg;base64,{b64_data}"
-        except Exception:
-            pass
+        return "/app/static/images/hero_boutique.jpg"
     return ""

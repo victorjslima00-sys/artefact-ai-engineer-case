@@ -12,7 +12,6 @@ Estrutura:
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 import html
 from typing import Optional
 from src.agent import EmporioChatbot
@@ -77,8 +76,7 @@ if "add_to_cart" in st.query_params:
             st.session_state.toast_msg = f"Instrumento {prod['name']} está esgotado no momento."
     except Exception:
         pass
-    st.query_params.clear()
-    st.rerun()
+    del st.query_params["add_to_cart"]
 
 if "consult_prod" in st.query_params:
     try:
@@ -92,8 +90,7 @@ if "consult_prod" in st.query_params:
             st.session_state.toast_msg = "Consultoria iniciada! Abra o Concierge no canto inferior esquerdo."
     except Exception:
         pass
-    st.query_params.clear()
-    st.rerun()
+    del st.query_params["consult_prod"]
 
 
 # --- Dark Boutique Atelier CSS Stylesheet ---
@@ -551,50 +548,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# --- Acoustic Atelier Chime Notification ---
-components.html("""
-<script>
-function playAtelierChime() {
-    try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        if (ctx.state === 'suspended') {
-            ctx.resume();
-        }
-        const now = ctx.currentTime;
-        [659.25, 987.77].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-            gain.gain.setValueAtTime(0.001, now + idx * 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.08, now + idx * 0.08 + 0.03);
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.85);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(now + idx * 0.08);
-            osc.stop(now + idx * 0.08 + 0.9);
-        });
-    } catch(e) {}
-}
-
-try {
-    const targetDoc = window.parent ? window.parent.document : document;
-    if (!window.parent._atelierChimeInit) {
-        window.parent._atelierChimeInit = true;
-        targetDoc.addEventListener('pointerdown', function() {
-            if (!window.parent._atelierChimePlayed) {
-                playAtelierChime();
-                window.parent._atelierChimePlayed = true;
-            }
-        }, { once: true });
-    }
-} catch(e) {
-    playAtelierChime();
-}
-</script>
-""", height=0, width=0)
 
 
 # --- 1. Top Ribbon Information Bar ---

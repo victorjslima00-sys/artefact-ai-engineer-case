@@ -1,7 +1,7 @@
 """
 Streamlit UI for Empório da Música.
 Modern Storefront with live catalog, interactive cart/checkout simulation,
-light/dark theme toggle, and a dedicated, always-accessible AI Chatbot view.
+light/dark theme toggle, sound notification, and a floating interactive AI widget.
 """
 
 import streamlit as st
@@ -13,7 +13,7 @@ from src.config import get_reference_date
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="Empório da Música — Loja & Atendimento IA",
+    page_title="Empório da Música — Loja Oficial & Atendimento IA",
     page_icon="🎸",
     layout="wide",
 )
@@ -51,8 +51,11 @@ if "price_limit" not in st.session_state:
 if "toast_msg" not in st.session_state:
     st.session_state.toast_msg = None
 
+if "sound_played" not in st.session_state:
+    st.session_state.sound_played = False
 
-# --- Custom CSS for Themes & Modern Storefront ---
+
+# --- Custom CSS for Themes, Storefront & Floating Widget ---
 theme_vars = {
     "light": {
         "bg_color": "#f8fafc",
@@ -65,6 +68,7 @@ theme_vars = {
         "hero_text": "#ffffff",
         "badge_bg": "#fef3c7",
         "badge_text": "#92400e",
+        "chat_window_bg": "#ffffff",
     },
     "dark": {
         "bg_color": "#090d16",
@@ -77,6 +81,7 @@ theme_vars = {
         "hero_text": "#f8fafc",
         "badge_bg": "#78350f",
         "badge_text": "#fde68a",
+        "chat_window_bg": "#131b2e",
     }
 }
 
@@ -226,8 +231,81 @@ st.markdown(f"""
     .pill-item strong {{
         color: {t['text_primary']};
     }}
+
+    /* Floating Chat Popover Button Styling (Positioned at Bottom-Right) */
+    div[data-testid="stPopover"] {{
+        position: fixed !important;
+        bottom: 24px !important;
+        right: 28px !important;
+        z-index: 999999 !important;
+    }}
+    div[data-testid="stPopover"] > button {{
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #ffffff !important;
+        border-radius: 9999px !important;
+        padding: 0.8rem 1.6rem !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        box-shadow: 0 10px 25px rgba(217, 119, 6, 0.5) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        animation: pulse-glow 2.5s infinite !important;
+    }}
+    div[data-testid="stPopover"] > button:hover {{
+        transform: scale(1.05) !important;
+        box-shadow: 0 14px 30px rgba(217, 119, 6, 0.7) !important;
+    }}
+
+    @keyframes pulse-glow {{
+        0% {{ box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.6); }}
+        70% {{ box-shadow: 0 0 0 14px rgba(217, 119, 6, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }}
+    }}
 </style>
 """, unsafe_allow_html=True)
+
+
+# --- Pleasant Greeting Sound Notification (Web Audio Synthesizer) ---
+if not st.session_state.sound_played:
+    st.markdown("""
+    <script>
+    (function() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+                // Note 1 (E5 - 659.25Hz)
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(659.25, now);
+                gain1.gain.setValueAtTime(0.18, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.35);
+
+                // Note 2 (B5 - 987.77Hz - pleasant chime)
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(987.77, now + 0.12);
+                gain2.gain.setValueAtTime(0.18, now + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(now + 0.12);
+                osc2.stop(now + 0.6);
+            }
+        } catch(e) {
+            console.log('Audio notification initialized on user gesture');
+        }
+    })();
+    </script>
+    """, unsafe_allow_html=True)
+    st.session_state.sound_played = True
 
 
 # --- Helper: Currency Formatter ---
@@ -238,7 +316,7 @@ def format_currency(val: float) -> str:
 # --- Top Navbar ---
 nav_col1, nav_col2 = st.columns([3, 1])
 with nav_col1:
-    st.markdown("### 🎸 Empório da Música")
+    st.markdown("### 🎸 Empório da Música — Loja Virtual")
 with nav_col2:
     theme_col, cart_col = st.columns([1, 1])
     with theme_col:
@@ -262,7 +340,7 @@ st.markdown(f"""
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
         <div class="hero-pill-badge">📍 Campo Grande/MS</div>
         <div class="hero-pill-badge">📅 {ref_date.strftime('%d/%m/%Y')}</div>
-        <div class="hero-pill-badge">⚡ Atendimento IA Conectado</div>
+        <div class="hero-pill-badge">⚡ Atendente Flutuante Ativo</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -295,243 +373,241 @@ if st.session_state.toast_msg:
     st.session_state.toast_msg = None
 
 
-# =========================================================
-# MAIN NAVIGATION: TABS (Vitrine da Loja vs. Atendente Virtual)
-# =========================================================
-tab_store, tab_chat = st.tabs(["🛍️ Vitrine & Loja Virtual", "💬 Atendimento com Assistente Virtual (IA)"])
+# --- Catalog Filters ---
+f_col1, f_col2, f_col3 = st.columns([2, 1.5, 1.5])
+categories = ["Todas"] + sorted(st.session_state.store.categories["name"].tolist())
 
-# ---------------------------------------------------------
-# TAB 1: STOREFRONT
-# ---------------------------------------------------------
-with tab_store:
-    # --- Catalog Filters ---
-    f_col1, f_col2, f_col3 = st.columns([2, 1.5, 1.5])
-    categories = ["Todas"] + sorted(st.session_state.store.categories["name"].tolist())
+with f_col1:
+    search_term = st.text_input("🔍 Buscar instrumento...", value=st.session_state.search_query, placeholder="Ex: Takamine, Fender, violão nylon...")
+    st.session_state.search_query = search_term
 
-    with f_col1:
-        search_term = st.text_input("🔍 Buscar instrumento...", value=st.session_state.search_query, placeholder="Ex: Takamine, Fender, violão nylon...")
-        st.session_state.search_query = search_term
+with f_col2:
+    selected_cat = st.selectbox("Categoria", categories, index=categories.index(st.session_state.selected_category) if st.session_state.selected_category in categories else 0)
+    st.session_state.selected_category = selected_cat
 
-    with f_col2:
-        selected_cat = st.selectbox("Categoria", categories, index=categories.index(st.session_state.selected_category) if st.session_state.selected_category in categories else 0)
-        st.session_state.selected_category = selected_cat
+with f_col3:
+    max_price_filter = st.slider("Preço máximo (R$)", min_value=150.0, max_value=25000.0, value=float(st.session_state.price_limit), step=100.0)
+    st.session_state.price_limit = max_price_filter
 
-    with f_col3:
-        max_price_filter = st.slider("Preço máximo (R$)", min_value=150.0, max_value=25000.0, value=float(st.session_state.price_limit), step=100.0)
-        st.session_state.price_limit = max_price_filter
+# --- Filter Products Dataset ---
+df_products = st.session_state.store.products.copy()
 
-    # --- Filter Products Dataset ---
-    df_products = st.session_state.store.products.copy()
+if selected_cat != "Todas":
+    cat_match = st.session_state.store.categories[st.session_state.store.categories["name"] == selected_cat]
+    if not cat_match.empty:
+        c_id = cat_match.iloc[0]["category_id"]
+        df_products = df_products[df_products["category_id"] == c_id]
 
-    if selected_cat != "Todas":
-        cat_match = st.session_state.store.categories[st.session_state.store.categories["name"] == selected_cat]
-        if not cat_match.empty:
-            c_id = cat_match.iloc[0]["category_id"]
-            df_products = df_products[df_products["category_id"] == c_id]
+if search_term:
+    term = search_term.strip().lower()
+    df_products = df_products[
+        df_products["name"].str.lower().str.contains(term, na=False) |
+        df_products["description"].str.lower().str.contains(term, na=False)
+    ]
 
-    if search_term:
-        term = search_term.strip().lower()
-        df_products = df_products[
-            df_products["name"].str.lower().str.contains(term, na=False) |
-            df_products["description"].str.lower().str.contains(term, na=False)
-        ]
+df_products = df_products[df_products["price_brl"] <= max_price_filter]
+df_products = df_products.sort_values(by="price_brl")
 
-    df_products = df_products[df_products["price_brl"] <= max_price_filter]
-    df_products = df_products.sort_values(by="price_brl")
+# --- Storefront Grid & Live Simulation Box ---
+col_catalog, col_drawer = st.columns([2.8, 1.2])
 
-    # --- Store Layout ---
-    col_catalog, col_drawer = st.columns([2.8, 1.2])
+with col_catalog:
+    st.markdown(f"#### Catálogo de Instrumentos ({len(df_products)} disponíveis)")
 
-    with col_catalog:
-        st.markdown(f"#### Catálogo de Produtos ({len(df_products)} disponíveis)")
+    if df_products.empty:
+        st.info("Nenhum instrumento encontrado com os filtros selecionados.")
+    else:
+        cols = st.columns(3)
+        for idx, (_, row) in enumerate(df_products.iterrows()):
+            p_id = int(row["product_id"])
+            p_name = str(row["name"])
+            p_price = float(row["price_brl"])
+            p_stock = int(row["stock_quantity"])
+            p_desc = str(row["description"])
+            p_cat = str(st.session_state.store.get_category_name(int(row["category_id"])))
+            p_promo = st.session_state.store.get_active_promotion(p_id)
+            p_status = str(row["status"])
 
-        if df_products.empty:
-            st.info("Nenhum instrumento encontrado com os filtros selecionados.")
-        else:
-            cols = st.columns(3)
-            for idx, (_, row) in enumerate(df_products.iterrows()):
-                p_id = int(row["product_id"])
-                p_name = str(row["name"])
-                p_price = float(row["price_brl"])
-                p_stock = int(row["stock_quantity"])
-                p_desc = str(row["description"])
-                p_cat = str(st.session_state.store.get_category_name(int(row["category_id"])))
-                p_promo = st.session_state.store.get_active_promotion(p_id)
-                p_status = str(row["status"])
+            with cols[idx % 3]:
+                promo_badge_html = ""
+                price_html = f'<div class="product-price">{format_currency(p_price)}</div>'
 
-                with cols[idx % 3]:
-                    promo_badge_html = ""
-                    price_html = f'<div class="product-price">{format_currency(p_price)}</div>'
+                if p_promo:
+                    disc = p_promo["discount_percent"]
+                    final_p = p_price * (1 - disc / 100)
+                    promo_badge_html = f'<div class="promo-tag">🔥 {disc:.0f}% OFF — {p_promo["description"]}</div>'
+                    price_html = f'<div><span class="product-old-price">{format_currency(p_price)}</span><span class="product-price" style="color: #dc2626;">{format_currency(final_p)}</span></div>'
 
-                    if p_promo:
-                        disc = p_promo["discount_percent"]
-                        final_p = p_price * (1 - disc / 100)
-                        promo_badge_html = f'<div class="promo-tag">🔥 {disc:.0f}% OFF — {p_promo["description"]}</div>'
-                        price_html = f'<div><span class="product-old-price">{format_currency(p_price)}</span><span class="product-price" style="color: #dc2626;">{format_currency(final_p)}</span></div>'
+                if p_status == "discontinued":
+                    stock_html = '<span class="stock-badge stock-out">Descontinuado</span>'
+                elif p_status == "coming_soon":
+                    stock_html = '<span class="stock-badge stock-low">Em Breve</span>'
+                elif p_stock <= 0:
+                    stock_html = '<span class="stock-badge stock-out">Esgotado (0)</span>'
+                elif p_stock <= 3:
+                    stock_html = f'<span class="stock-badge stock-low">Apenas {p_stock} em estoque</span>'
+                else:
+                    stock_html = f'<span class="stock-badge stock-in">{p_stock} em estoque</span>'
 
-                    if p_status == "discontinued":
-                        stock_html = '<span class="stock-badge stock-out">Descontinuado</span>'
-                    elif p_status == "coming_soon":
-                        stock_html = '<span class="stock-badge stock-low">Em Breve</span>'
-                    elif p_stock <= 0:
-                        stock_html = '<span class="stock-badge stock-out">Esgotado (0)</span>'
-                    elif p_stock <= 3:
-                        stock_html = f'<span class="stock-badge stock-low">Apenas {p_stock} em estoque</span>'
-                    else:
-                        stock_html = f'<span class="stock-badge stock-in">{p_stock} em estoque</span>'
+                clean_desc = p_desc[:110] + "..." if len(p_desc) > 110 else p_desc
+                card_content = (
+                    f'<div class="product-card">'
+                    f'<div>'
+                    f'<div class="product-category">{p_cat}</div>'
+                    f'<div class="product-title">{p_name}</div>'
+                    f'{promo_badge_html}'
+                    f'<div class="product-desc">{clean_desc}</div>'
+                    f'</div>'
+                    f'<div style="margin-top: 0.6rem; display: flex; justify-content: space-between; align-items: baseline;">'
+                    f'{price_html}'
+                    f'{stock_html}'
+                    f'</div>'
+                    f'</div>'
+                )
+                st.markdown(card_content, unsafe_allow_html=True)
 
-                    # Clean card rendering (safe HTML)
-                    clean_desc = p_desc[:110] + "..." if len(p_desc) > 110 else p_desc
-                    card_content = (
-                        f'<div class="product-card">'
-                        f'<div>'
-                        f'<div class="product-category">{p_cat}</div>'
-                        f'<div class="product-title">{p_name}</div>'
-                        f'{promo_badge_html}'
-                        f'<div class="product-desc">{clean_desc}</div>'
-                        f'</div>'
-                        f'<div style="margin-top: 0.6rem; display: flex; justify-content: space-between; align-items: baseline;">'
-                        f'{price_html}'
-                        f'{stock_html}'
-                        f'</div>'
-                        f'</div>'
-                    )
-                    st.markdown(card_content, unsafe_allow_html=True)
+                btn_c1, btn_c2 = st.columns([1, 1])
+                with btn_c1:
+                    can_buy = p_stock > 0 and p_status == "active"
+                    if st.button("🛒 Comprar", key=f"buy_{p_id}", disabled=not can_buy, use_container_width=True):
+                        st.session_state.cart[p_id] = st.session_state.cart.get(p_id, 0) + 1
+                        st.session_state.store.adjust_product_stock(p_id, -1)
+                        st.session_state.toast_msg = f"{p_name} adicionado ao carrinho! Estoque atualizado."
+                        st.rerun()
 
-                    btn_c1, btn_c2 = st.columns([1, 1])
-                    with btn_c1:
-                        can_buy = p_stock > 0 and p_status == "active"
-                        if st.button("🛒 Comprar", key=f"buy_{p_id}", disabled=not can_buy, use_container_width=True):
-                            st.session_state.cart[p_id] = st.session_state.cart.get(p_id, 0) + 1
-                            st.session_state.store.adjust_product_stock(p_id, -1)
-                            st.session_state.toast_msg = f"{p_name} adicionado ao carrinho! Estoque atualizado."
-                            st.rerun()
+                with btn_c2:
+                    if st.button("💬 Perguntar", key=f"chat_{p_id}", use_container_width=True):
+                        st.session_state.active_chat_prompt = f"Gostaria de saber mais sobre o instrumento '{p_name}'. Qual o preço e o estoque atual?"
+                        st.session_state.toast_msg = "Abra o Atendente Flutuante no canto inferior direito para conversar!"
+                        st.rerun()
 
-                    with btn_c2:
-                        if st.button("💬 Perguntar", key=f"chat_{p_id}", use_container_width=True):
-                            st.session_state.initial_chat_prompt = f"Gostaria de saber mais sobre o instrumento '{p_name}'. Qual o preço e o estoque atual?"
-                            st.session_state.toast_msg = "Pergunta enviada para a aba de Atendimento IA!"
-                            st.rerun()
+                st.write("")
 
-                    st.write("")
+with col_drawer:
+    st.markdown("#### 🛍️ Carrinho & Simulação")
+    st.caption("Compras alteram o estoque no sistema em tempo real.")
 
-    with col_drawer:
-        st.markdown("#### 🛍️ Carrinho & Simulação")
-        st.caption("Compras alteram o estoque no sistema em tempo real.")
+    if not st.session_state.cart:
+        st.info("Seu carrinho está vazio.")
+    else:
+        total_order_val = 0.0
+        for cart_p_id, qty in list(st.session_state.cart.items()):
+            prod = st.session_state.store.get_product_by_id(cart_p_id)
+            if prod:
+                price = float(prod["price_brl"])
+                promo = st.session_state.store.get_active_promotion(cart_p_id)
+                if promo:
+                    price = price * (1 - promo["discount_percent"] / 100)
+                subtotal = price * qty
+                total_order_val += subtotal
 
-        if not st.session_state.cart:
-            st.info("Seu carrinho está vazio.")
-        else:
-            total_order_val = 0.0
-            for cart_p_id, qty in list(st.session_state.cart.items()):
-                prod = st.session_state.store.get_product_by_id(cart_p_id)
-                if prod:
-                    price = float(prod["price_brl"])
-                    promo = st.session_state.store.get_active_promotion(cart_p_id)
-                    if promo:
-                        price = price * (1 - promo["discount_percent"] / 100)
-                    subtotal = price * qty
-                    total_order_val += subtotal
+                cart_c1, cart_c2 = st.columns([3, 1])
+                with cart_c1:
+                    st.markdown(f"**{prod['name']}**")
+                    st.caption(f"{qty}x {format_currency(price)} = **{format_currency(subtotal)}**")
+                with cart_c2:
+                    if st.button("❌", key=f"del_cart_{cart_p_id}"):
+                        st.session_state.store.adjust_product_stock(cart_p_id, qty)
+                        del st.session_state.cart[cart_p_id]
+                        st.rerun()
+                st.divider()
 
-                    cart_c1, cart_c2 = st.columns([3, 1])
-                    with cart_c1:
-                        st.markdown(f"**{prod['name']}**")
-                        st.caption(f"{qty}x {format_currency(price)} = **{format_currency(subtotal)}**")
-                    with cart_c2:
-                        if st.button("❌", key=f"del_cart_{cart_p_id}"):
-                            st.session_state.store.adjust_product_stock(cart_p_id, qty)
-                            del st.session_state.cart[cart_p_id]
-                            st.rerun()
-                    st.divider()
+        st.markdown(f"**Total: {format_currency(total_order_val)}**")
+        st.caption(f"À vista no PIX (5% off): **{format_currency(total_order_val * 0.95)}**")
 
-            st.markdown(f"**Total: {format_currency(total_order_val)}**")
-            st.caption(f"À vista no PIX (5% off): **{format_currency(total_order_val * 0.95)}**")
-
-            if st.button("Finalizar Pedido Simulado", use_container_width=True, type="primary"):
-                st.session_state.cart = {}
-                st.success("Pedido concluído! O estoque foi reduzido na sessão.")
-                st.rerun()
-
-        st.markdown("---")
-        st.markdown("#### 🔧 Teste de Estoque ao Vivo")
-        st.caption("Altere o estoque de qualquer instrumento e pergunte para o chatbot:")
-
-        all_names = st.session_state.store.products["name"].tolist()
-        test_product_name = st.selectbox("Selecione um instrumento:", options=all_names, key="stock_test_select")
-        p_row = st.session_state.store.products[st.session_state.store.products["name"] == test_product_name].iloc[0]
-        curr_qty = int(p_row["stock_quantity"])
-
-        stock_col1, stock_col2 = st.columns([1, 1])
-        with stock_col1:
-            new_stock_val = st.number_input("Estoque:", min_value=0, max_value=999, value=curr_qty, key=f"num_stock_{p_row['product_id']}")
-        with stock_col2:
-            st.write("")
-            st.write("")
-            if st.button("Atualizar", key="btn_apply_stock", use_container_width=True):
-                st.session_state.store.update_product_stock(int(p_row["product_id"]), int(new_stock_val))
-                st.session_state.toast_msg = f"Estoque de '{test_product_name}' alterado para {new_stock_val}!"
-                st.rerun()
-
-
-# ---------------------------------------------------------
-# TAB 2: DEDICATED AI CHATBOT (FULL INTERACTION)
-# ---------------------------------------------------------
-with tab_chat:
-    chat_top1, chat_top2 = st.columns([3, 1])
-    with chat_top1:
-        st.markdown("#### 💬 Atendimento Inteligente — Empório da Música")
-        st.caption("Assistente virtual conectado ao estoque real e às políticas de atendimento.")
-    with chat_top2:
-        if st.button("🧹 Limpar Histórico", key="clear_chat_tab_btn", use_container_width=True):
-            st.session_state.messages = []
-            st.session_state.chatbot.reset_history()
+        if st.button("Finalizar Pedido Simulado", use_container_width=True, type="primary"):
+            st.session_state.cart = {}
+            st.success("Pedido concluído! Estoque reduzido na sessão.")
             st.rerun()
 
-    # Pre-fill prompt if user clicked "Perguntar" in catalog
-    auto_prompt = None
-    if "initial_chat_prompt" in st.session_state and st.session_state.initial_chat_prompt:
-        auto_prompt = st.session_state.initial_chat_prompt
-        del st.session_state.initial_chat_prompt
+    st.markdown("---")
+    st.markdown("#### 🔧 Teste de Estoque ao Vivo")
+    st.caption("Altere o estoque de qualquer instrumento e pergunte para o chatbot:")
 
-    # Container for conversation history
-    chat_box = st.container(height=520)
+    all_names = st.session_state.store.products["name"].tolist()
+    test_product_name = st.selectbox("Selecione um instrumento:", options=all_names, key="stock_test_select")
+    p_row = st.session_state.store.products[st.session_state.store.products["name"] == test_product_name].iloc[0]
+    curr_qty = int(p_row["stock_quantity"])
 
-    with chat_box:
-        if not st.session_state.messages:
-            welcome_text = (
-                "Olá! 👋 Bem-vindo(a) à **Empório da Música**! Sou o assistente virtual da loja.\n\n"
-                "Posso te ajudar a consultar nossos **instrumentos em estoque**, verificar **preços e promoções**, "
-                "consultar **status de pedidos** (com seu telefone ou e-mail) ou tirar dúvidas sobre nossas **políticas de garantia e devolução**.\n\n"
-                "Como posso te ajudar hoje? 🎵"
-            )
-            with st.chat_message("assistant", avatar="🎸"):
-                st.markdown(welcome_text)
+    stock_col1, stock_col2 = st.columns([1, 1])
+    with stock_col1:
+        new_stock_val = st.number_input("Estoque:", min_value=0, max_value=999, value=curr_qty, key=f"num_stock_{p_row['product_id']}")
+    with stock_col2:
+        st.write("")
+        st.write("")
+        if st.button("Atualizar", key="btn_apply_stock", use_container_width=True):
+            st.session_state.store.update_product_stock(int(p_row["product_id"]), int(new_stock_val))
+            st.session_state.toast_msg = f"Estoque de '{test_product_name}' alterado para {new_stock_val}!"
+            st.rerun()
 
-        for msg in st.session_state.messages:
-            with st.chat_message(msg["role"], avatar="🎸" if msg["role"] == "assistant" else None):
-                st.markdown(msg["content"])
 
-    # Chat Input Box
-    user_prompt = st.chat_input("Digite sua dúvida aqui (ex: 'Quanto custa o Takamine GD20?' ou 'Quantas guitarras têm no estoque?')...")
+# =========================================================
+# FLOATING WIDGET AT BOTTOM-RIGHT: ATENDENTE VIRTUAL POPUP
+# =========================================================
+with st.popover("💬 Atendente Virtual", use_container_width=False):
+    st.markdown(f"""
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+        <div>
+            <h4 style="margin: 0; color: {t['text_primary']};">🎸 Empório da Música</h4>
+            <span style="font-size: 0.8rem; color: {t['text_secondary']};">Assistente Virtual Inteligente (conectado ao estoque)</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # If there is input from either the chat bar or a catalog click
-    active_prompt = user_prompt or auto_prompt
+    if not st.session_state.chatbot_ready:
+        st.error(f"Erro ao inicializar IA: {st.session_state.get('chatbot_error', 'Verifique a GEMINI_API_KEY')}")
+    else:
+        top_btn1, top_btn2 = st.columns([2, 1])
+        with top_btn2:
+            if st.button("🧹 Limpar", key="clear_popover_chat"):
+                st.session_state.messages = []
+                st.session_state.chatbot.reset_history()
+                st.rerun()
 
-    if active_prompt:
-        st.session_state.messages.append({"role": "user", "content": active_prompt})
+        # Conversation Box
+        chat_box = st.container(height=380)
 
         with chat_box:
-            with st.chat_message("user"):
-                st.markdown(active_prompt)
+            # Welcoming message
+            if not st.session_state.messages:
+                welcome_text = (
+                    "Olá! 👋 Bem-vindo(a) à **Empório da Música**! Sou o seu assistente virtual.\n\n"
+                    "Posso te ajudar com dúvidas sobre instrumentos, checar **preços e estoques em tempo real**, "
+                    "consultar **pedidos e rastreamento**, ou informar sobre nossas **políticas de garantia e devolução**.\n\n"
+                    "Como posso te ajudar agora? 🎵"
+                )
+                with st.chat_message("assistant", avatar="🎸"):
+                    st.markdown(welcome_text)
 
-            with st.chat_message("assistant", avatar="🎸"):
-                with st.spinner("Consultando dados da loja em tempo real..."):
-                    try:
-                        reply = st.session_state.chatbot.send_message(active_prompt)
-                        st.markdown(reply)
-                        st.session_state.messages.append({"role": "assistant", "content": reply})
-                    except Exception as ex:
-                        err_msg = f"Desculpe, ocorreu um erro ao consultar o sistema: {str(ex)}"
-                        st.error(err_msg)
-                        st.session_state.messages.append({"role": "assistant", "content": err_msg})
-        st.rerun()
+            for msg in st.session_state.messages:
+                with st.chat_message(msg["role"], avatar="🎸" if msg["role"] == "assistant" else None):
+                    st.markdown(msg["content"])
+
+        # Auto-fill from catalog 'Perguntar' button
+        pre_prompt = None
+        if "active_chat_prompt" in st.session_state and st.session_state.active_chat_prompt:
+            pre_prompt = st.session_state.active_chat_prompt
+            del st.session_state.active_chat_prompt
+
+        chat_input_val = st.chat_input("Digite sua dúvida aqui...")
+
+        prompt_to_send = chat_input_val or pre_prompt
+
+        if prompt_to_send:
+            st.session_state.messages.append({"role": "user", "content": prompt_to_send})
+
+            with chat_box:
+                with st.chat_message("user"):
+                    st.markdown(prompt_to_send)
+
+                with st.chat_message("assistant", avatar="🎸"):
+                    with st.spinner("Consultando dados da loja..."):
+                        try:
+                            reply = st.session_state.chatbot.send_message(prompt_to_send)
+                            st.markdown(reply)
+                            st.session_state.messages.append({"role": "assistant", "content": reply})
+                        except Exception as ex:
+                            err_msg = f"Desculpe, ocorreu um erro ao consultar o sistema: {str(ex)}"
+                            st.error(err_msg)
+                            st.session_state.messages.append({"role": "assistant", "content": err_msg})
+            st.rerun()

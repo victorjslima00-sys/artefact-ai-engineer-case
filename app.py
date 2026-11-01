@@ -232,10 +232,10 @@ st.markdown(f"""
         color: {t['text_primary']};
     }}
 
-    /* Floating Chat Popover Button Styling (Positioned at Bottom-Right) */
+    /* Floating Circle AI Chatbot Button (Bottom-Right) */
     div[data-testid="stPopover"] {{
         position: fixed !important;
-        bottom: 24px !important;
+        bottom: 28px !important;
         right: 28px !important;
         z-index: 999999 !important;
     }}
@@ -243,17 +243,23 @@ st.markdown(f"""
         background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
         color: #ffffff !important;
         border: 2px solid #ffffff !important;
-        border-radius: 9999px !important;
-        padding: 0.8rem 1.6rem !important;
-        font-size: 1rem !important;
-        font-weight: 700 !important;
+        border-radius: 50% !important;
+        width: 62px !important;
+        height: 62px !important;
+        min-width: 62px !important;
+        max-width: 62px !important;
+        padding: 0 !important;
+        font-size: 1.85rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         box-shadow: 0 10px 25px rgba(217, 119, 6, 0.5) !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
         animation: pulse-glow 2.5s infinite !important;
     }}
     div[data-testid="stPopover"] > button:hover {{
-        transform: scale(1.05) !important;
-        box-shadow: 0 14px 30px rgba(217, 119, 6, 0.7) !important;
+        transform: scale(1.12) !important;
+        box-shadow: 0 14px 30px rgba(217, 119, 6, 0.75) !important;
     }}
 
     @keyframes pulse-glow {{
@@ -544,7 +550,7 @@ with col_drawer:
 # =========================================================
 # FLOATING WIDGET AT BOTTOM-RIGHT: ATENDENTE VIRTUAL POPUP
 # =========================================================
-with st.popover("💬 Atendente Virtual", use_container_width=False):
+with st.popover("🤖", use_container_width=False):
     st.markdown(f"""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
         <div>

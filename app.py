@@ -1,27 +1,34 @@
 """
-Empório da Música — Loja Virtual & Atendimento Especializado
-High-End Luxury Musical Instruments Storefront & Concierge AI Consultant.
-Crafted with bespoke typography, warm ivory/sand palette, polished brass accents,
-and a floating dedicated AI Concierge.
+Empório da Música — Boutique Digital de Instrumentos Musicais Nobres.
+Identidade: Dark Luxury Atelier (Preto Profundo #0b0d12, Grafite #11141c, Nogueira #1b1712, Ouro Envelhecido/Bronze #d1b48c).
+Estrutura:
+1. Faixa Superior Fina de Informações (endereço, horário, pagamento, garantia, WhatsApp).
+2. Cabeçalho de Marca Refinado + Apresentação Editorial com Hero Banner de Luthieria.
+3. Barra de Busca e Filtro de Famílias.
+4. Catálogo em Carrosséis Horizontais por Família (Violões [35], Ukuleles [15], Guitarras [5], Baixos [4], Baterias [3], Teclados [3]).
+5. Cards com Imagens Autênticas (WebP e Silhuetas Vetoriais Nobres), Preços, Promoções e Botões de Ação Direta.
+6. Consultor Virtual Especializado (Concierge de IA) Flutuante no Canto Inferior Esquerdo (🤖).
+7. Sacola de Compras Flutuante no Canto Inferior Direito (👜).
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import html
 from typing import Optional
 from src.agent import EmporioChatbot
 from src.data_loader import DataStore
 from src.config import get_reference_date
-from src.image_helper import get_product_image_data_uri, get_image_base64, HERO_IMG_PATH, ACOUSTIC_IMG_PATH
+from src.image_resolver import get_product_image_src, get_hero_banner_base64
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="Empório da Música — Instrumentos Musicais Nobres",
+    page_title="Empório da Música — Boutique de Instrumentos Nobres",
     page_icon="🎻",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# --- State Management ---
+# --- Session State Setup ---
 if "store" not in st.session_state:
     st.session_state.store = DataStore()
 
@@ -37,7 +44,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 if "cart" not in st.session_state:
-    st.session_state.cart = {}
+    st.session_state.cart = {}  # {product_id: quantity}
 
 if "search_query" not in st.session_state:
     st.session_state.search_query = ""
@@ -51,722 +58,908 @@ if "max_price" not in st.session_state:
 if "toast_msg" not in st.session_state:
     st.session_state.toast_msg = None
 
-if "sound_played" not in st.session_state:
-    st.session_state.sound_played = False
-
-
-# --- Elegant Luxury CSS Stylesheet ---
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-
-    /* Global Foundation */
-    .stApp {
-        background-color: #fcfbf9 !important;
-        color: #1a1612 !important;
-        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
-    }
-
-    /* Luxury Header Topbar */
-    .top-announcement {
-        background-color: #1a1612;
-        color: #d8c29d;
-        text-align: center;
-        padding: 0.45rem 1rem;
-        font-size: 0.76rem;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        font-weight: 500;
-        border-bottom: 1px solid #332b24;
-    }
-
-    .boutique-header {
-        padding: 1.6rem 0 1.2rem 0;
-        border-bottom: 1px solid #eae5dc;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        margin-bottom: 2rem;
-    }
-    .brand-title {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 2.5rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-        color: #1a1612;
-        margin: 0;
-        line-height: 1;
-    }
-    .brand-subtitle {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.78rem;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        color: #8a7a68;
-        margin-top: 0.35rem;
-    }
-
-    /* Hero Presentation */
-    .hero-editorial {
-        background-color: #f4efe6;
-        border: 1px solid #e5ded3;
-        border-radius: 4px;
-        display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        overflow: hidden;
-        margin-bottom: 2.8rem;
-        box-shadow: 0 12px 30px -10px rgba(38, 28, 20, 0.06);
-    }
-    @media (max-width: 900px) {
-        .hero-editorial { grid-template-columns: 1fr; }
-    }
-    .hero-content {
-        padding: 3.5rem 3.5rem 3rem 3.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .hero-tagline {
-        font-size: 0.8rem;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: #9e7d56;
-        font-weight: 600;
-        margin-bottom: 0.8rem;
-    }
-    .hero-headline {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 3rem;
-        line-height: 1.08;
-        font-weight: 600;
-        color: #1a1612;
-        margin: 0 0 1.2rem 0;
-    }
-    .hero-headline em {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-style: italic;
-        font-weight: 400;
-        color: #8c6843;
-    }
-    .hero-copy {
-        font-size: 0.95rem;
-        line-height: 1.65;
-        color: #5a4f43;
-        max-width: 480px;
-        margin-bottom: 1.8rem;
-    }
-    .hero-image-wrap {
-        height: 100%;
-        min-height: 380px;
-        background-size: cover;
-        background-position: center;
-    }
-
-    /* Minimal Floating Info Ribbon */
-    .luxury-ribbon {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 1.4rem;
-        background: #ffffff;
-        border: 1px solid #eae5dc;
-        border-radius: 3px;
-        margin-bottom: 2.2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-    .ribbon-item {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        font-size: 0.82rem;
-        color: #6a5e52;
-    }
-    .ribbon-item strong {
-        color: #1a1612;
-        font-weight: 600;
-    }
-    .ribbon-sep {
-        color: #dcd4c7;
-    }
-
-    /* Product Cards - Boutique Atelier Look */
-    .atelier-card {
-        background: #ffffff;
-        border: 1px solid #eae5dc;
-        border-radius: 2px;
-        padding: 0;
-        margin-bottom: 1.6rem;
-        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-    .atelier-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 16px 32px -8px rgba(35, 25, 15, 0.08);
-        border-color: #c9b497;
-    }
-    .atelier-img-container {
-        width: 100%;
-        height: 240px;
-        background-color: #f7f4ed;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-bottom: 1px solid #f1ece4;
-    }
-    .atelier-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        transition: transform 0.4s ease;
-    }
-    .atelier-card:hover .atelier-img {
-        transform: scale(1.04);
-    }
-    .atelier-body {
-        padding: 1.3rem 1.4rem 1.1rem 1.4rem;
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-    }
-    .atelier-cat {
-        font-size: 0.68rem;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        font-weight: 600;
-        color: #9e7d56;
-        margin-bottom: 0.35rem;
-    }
-    .atelier-name {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #1a1612;
-        margin-bottom: 0.45rem;
-        line-height: 1.22;
-        min-height: 3.2rem;
-    }
-    .atelier-desc {
-        font-size: 0.81rem;
-        line-height: 1.5;
-        color: #6a5e52;
-        margin-bottom: 1rem;
-        flex-grow: 1;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    .atelier-footer {
-        padding-top: 0.8rem;
-        border-top: 1px solid #f2ede5;
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-    }
-    .atelier-price {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #1a1612;
-    }
-    .atelier-price-old {
-        font-size: 0.8rem;
-        color: #9c8e7f;
-        text-decoration: line-through;
-        margin-right: 0.4rem;
-    }
-    .atelier-badge-promo {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: #1a1612;
-        color: #e5cfab;
-        font-size: 0.68rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        padding: 0.3rem 0.65rem;
-        border-radius: 1px;
-        z-index: 2;
-    }
-    .atelier-stock {
-        font-size: 0.72rem;
-        font-weight: 500;
-        color: #706254;
-    }
-
-    /* Floating Circle AI Concierge Trigger Button (Bottom Right) */
-    div[data-testid="stPopover"] {
-        position: fixed !important;
-        bottom: 30px !important;
-        right: 32px !important;
-        z-index: 999999 !important;
-    }
-    div[data-testid="stPopover"] > button {
-        background: #1a1612 !important;
-        color: #d8c29d !important;
-        border: 1px solid #4a3c30 !important;
-        border-radius: 50% !important;
-        width: 64px !important;
-        height: 64px !important;
-        min-width: 64px !important;
-        max-width: 64px !important;
-        padding: 0 !important;
-        font-size: 1.7rem !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 14px 28px rgba(26, 22, 18, 0.28) !important;
-        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
-    }
-    div[data-testid="stPopover"] > button:hover {
-        transform: scale(1.08) !important;
-        background: #28211b !important;
-        border-color: #d8c29d !important;
-        box-shadow: 0 18px 36px rgba(26, 22, 18, 0.4) !important;
-    }
-
-    /* Clean Streamlit Chat Elements */
-    [data-testid="stChatMessage"] {
-        background-color: #f7f4ed !important;
-        border: 1px solid #eae5dc !important;
-        border-radius: 3px !important;
-        margin-bottom: 0.7rem !important;
-    }
-    [data-testid="stChatMessage"] p {
-        color: #1a1612 !important;
-        font-size: 0.88rem !important;
-        line-height: 1.55 !important;
-    }
-
-    /* Cart & Checkout Drawer */
-    .cart-box {
-        background: #ffffff;
-        border: 1px solid #eae5dc;
-        border-radius: 2px;
-        padding: 1.4rem;
-        margin-bottom: 1.8rem;
-    }
-    .cart-title {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #1a1612;
-        margin: 0 0 0.8rem 0;
-        border-bottom: 1px solid #f0eae1;
-        padding-bottom: 0.5rem;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-
-# --- Pleasant Ambient Chime (Native Web Audio) ---
-if not st.session_state.sound_played:
-    st.markdown("""
-    <script>
-    (function() {
-        try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) {
-                const ctx = new AudioCtx();
-                const now = ctx.currentTime;
-                // Soft acoustic guitar harmonics chord (A major 432Hz inspired warm chime)
-                [440, 554.37, 659.25].forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, now + (idx * 0.08));
-                    gain.gain.setValueAtTime(0.12, now + (idx * 0.08));
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now + (idx * 0.08));
-                    osc.stop(now + 1.2);
-                });
-            }
-        } catch(e) {}
-    })();
-    </script>
-    """, unsafe_allow_html=True)
-    st.session_state.sound_played = True
-
 
 # --- Format Helpers ---
 def fmt_price(val: float) -> str:
     return f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-# --- Top Bar ---
+# --- Handle Direct Card Clicks via Query Parameters ---
+if "add_to_cart" in st.query_params:
+    try:
+        p_to_buy = int(st.query_params["add_to_cart"])
+        prod = st.session_state.store.get_product_by_id(p_to_buy)
+        if prod and prod["status"] == "active" and prod["stock_quantity"] > 0:
+            st.session_state.cart[p_to_buy] = st.session_state.cart.get(p_to_buy, 0) + 1
+            st.session_state.store.adjust_product_stock(p_to_buy, -1)
+            st.session_state.toast_msg = f"{prod['name']} adicionado à sua sacola!"
+        elif prod and prod["stock_quantity"] <= 0:
+            st.session_state.toast_msg = f"Instrumento {prod['name']} está esgotado no momento."
+    except Exception:
+        pass
+    st.query_params.clear()
+    st.rerun()
+
+if "consult_prod" in st.query_params:
+    try:
+        p_to_consult = int(st.query_params["consult_prod"])
+        prod = st.session_state.store.get_product_by_id(p_to_consult)
+        if prod:
+            st.session_state.active_chat_prompt = (
+                f"Gostaria de uma consultoria sobre o instrumento '{prod['name']}'. "
+                f"Qual o valor, especificações e disponibilidade em acervo?"
+            )
+            st.session_state.toast_msg = "Consultoria iniciada! Abra o Concierge no canto inferior esquerdo."
+    except Exception:
+        pass
+    st.query_params.clear()
+    st.rerun()
+
+
+# --- Dark Boutique Atelier CSS Stylesheet ---
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+    /* Global Foundation */
+    .stApp {
+        background-color: #0b0d12 !important;
+        color: #e8dfd5 !important;
+        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
+    }
+
+    /* Top Ribbon Info Bar */
+    .boutique-top-ribbon {
+        background-color: #06070a;
+        border-bottom: 1px solid #1a1e28;
+        padding: 0.6rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 0.77rem;
+        color: #9aa2b5;
+        letter-spacing: 0.04em;
+    }
+    .ribbon-group {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+    .ribbon-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .ribbon-item strong {
+        color: #d1b48c;
+        font-weight: 600;
+    }
+    .ribbon-sep {
+        color: #2b303e;
+    }
+
+    /* Main Brand Header */
+    .brand-header {
+        padding: 1.8rem 1.5rem 1.2rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 1px solid #161a24;
+        margin-bottom: 1.8rem;
+    }
+    .brand-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 2.8rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: #f7efe6;
+        margin: 0;
+        line-height: 1;
+    }
+    .brand-tagline {
+        font-size: 0.78rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #a68a68;
+        margin-top: 0.4rem;
+    }
+
+    /* Editorial Hero Presentation */
+    .hero-editorial {
+        background: radial-gradient(circle at 60% 40%, #161b26 0%, #0c0f16 100%);
+        border: 1px solid #202636;
+        border-radius: 4px;
+        display: grid;
+        grid-template-columns: 1.25fr 0.75fr;
+        overflow: hidden;
+        margin: 0 1.5rem 2.5rem 1.5rem;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+    }
+    @media (max-width: 900px) {
+        .hero-editorial { grid-template-columns: 1fr; }
+    }
+    .hero-content {
+        padding: 3rem 2.8rem 2.6rem 2.8rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .hero-badge {
+        font-size: 0.74rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #d1b48c;
+        font-weight: 600;
+        margin-bottom: 0.7rem;
+    }
+    .hero-heading {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 2.8rem;
+        line-height: 1.12;
+        font-weight: 600;
+        color: #f7efe6;
+        margin: 0 0 1rem 0;
+    }
+    .hero-heading em {
+        font-style: italic;
+        color: #e2c196;
+        font-weight: 400;
+    }
+    .hero-text {
+        font-size: 0.92rem;
+        line-height: 1.65;
+        color: #a4adbd;
+        max-width: 520px;
+        margin-bottom: 1.4rem;
+    }
+    .hero-bg-img {
+        height: 100%;
+        min-height: 350px;
+        background-size: cover;
+        background-position: center;
+        border-left: 1px solid #202636;
+    }
+
+    /* Carousel Categories Header */
+    .section-editorial-header {
+        margin: 2.5rem 1.5rem 0.8rem 1.5rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 1px solid #1a1e28;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+    .section-editorial-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: #f7efe6;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .section-item-count {
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #a68a68;
+    }
+
+    /* Horizontal Carousel Track */
+    .carousel-track {
+        display: flex;
+        gap: 1.25rem;
+        overflow-x: auto;
+        padding: 0.6rem 1.5rem 1.5rem 1.5rem;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+        scrollbar-color: #2b3140 transparent;
+    }
+    .carousel-track::-webkit-scrollbar {
+        height: 6px;
+    }
+    .carousel-track::-webkit-scrollbar-thumb {
+        background: #2b3140;
+        border-radius: 3px;
+    }
+    .carousel-track::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    /* Product Card in Dark Luxury Atelier */
+    .boutique-card {
+        flex: 0 0 280px;
+        scroll-snap-align: start;
+        background: #11141c;
+        border: 1px solid #1f2533;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+        position: relative;
+    }
+    .boutique-card:hover {
+        transform: translateY(-5px);
+        border-color: #8c704f;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+    }
+    .card-img-container {
+        width: 100%;
+        height: 230px;
+        background-color: #090b0f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-bottom: 1px solid #1a202c;
+    }
+    .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.35s ease;
+    }
+    .boutique-card:hover .card-img {
+        transform: scale(1.05);
+    }
+    .card-body {
+        padding: 1.15rem 1.15rem 0.6rem 1.15rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    .card-category {
+        font-size: 0.68rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: #bfa17c;
+        margin-bottom: 0.25rem;
+    }
+    .card-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #f7efe6;
+        line-height: 1.25;
+        margin: 0 0 0.5rem 0;
+        min-height: 3.2rem;
+    }
+    .card-desc {
+        font-size: 0.79rem;
+        line-height: 1.45;
+        color: #8e97a8;
+        margin-bottom: 0.8rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .card-price-row {
+        margin-top: auto;
+        padding-top: 0.75rem;
+        border-top: 1px solid #1a202c;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+    .card-price {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #f7efe6;
+    }
+    .card-price-old {
+        font-size: 0.8rem;
+        text-decoration: line-through;
+        color: #636b7b;
+        margin-right: 0.35rem;
+    }
+    .card-badge-promo {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #2b1f13;
+        border: 1px solid #73532c;
+        color: #f0caa3;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.25rem 0.6rem;
+        border-radius: 2px;
+        z-index: 2;
+    }
+    .card-stock-label {
+        font-size: 0.72rem;
+        font-weight: 500;
+    }
+
+    /* Embedded Card Action Buttons */
+    .card-actions {
+        padding: 0.6rem 1.15rem 1.15rem 1.15rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+    .btn-boutique-add {
+        flex: 1.2;
+        background: #1b1712;
+        color: #e5cfab !important;
+        border: 1px solid #73532c;
+        border-radius: 3px;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.76rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none !important;
+        letter-spacing: 0.04em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .btn-boutique-add:hover {
+        background: #2f2317;
+        border-color: #d1b48c;
+        color: #ffffff !important;
+    }
+    .btn-boutique-consult {
+        flex: 0.9;
+        background: #12151e;
+        color: #9aa2b5 !important;
+        border: 1px solid #232b3d;
+        border-radius: 3px;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.74rem;
+        font-weight: 500;
+        text-align: center;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .btn-boutique-consult:hover {
+        background: #1a202c;
+        border-color: #4a5568;
+        color: #e8dfd5 !important;
+    }
+    .btn-boutique-disabled {
+        flex: 1.2;
+        background: #151821;
+        color: #555e70;
+        border: 1px solid #202636;
+        border-radius: 3px;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.74rem;
+        text-align: center;
+        cursor: not-allowed;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Floating Anchors */
+    #concierge-anchor, #cart-anchor {
+        display: none;
+    }
+
+    /* Floating Concierge Popover (Bottom Left) */
+    div[data-testid="stElementContainer"]:has(#concierge-anchor) + div[data-testid="stElementContainer"] {
+        position: fixed !important;
+        bottom: 24px !important;
+        left: 24px !important;
+        z-index: 999999 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+    div[data-testid="stElementContainer"]:has(#concierge-anchor) + div[data-testid="stElementContainer"] div[data-testid="stPopover"] > button {
+        background: linear-gradient(135deg, #1d1813 0%, #0d0f15 100%) !important;
+        color: #e5cfab !important;
+        border: 2px solid #8c704f !important;
+        border-radius: 50% !important;
+        width: 62px !important;
+        height: 62px !important;
+        min-width: 62px !important;
+        max-width: 62px !important;
+        min-height: 62px !important;
+        max-height: 62px !important;
+        padding: 0 !important;
+        font-size: 1.85rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), 0 0 18px rgba(209, 180, 140, 0.3) !important;
+        cursor: pointer !important;
+        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+    }
+    div[data-testid="stElementContainer"]:has(#concierge-anchor) + div[data-testid="stElementContainer"] div[data-testid="stPopover"] > button:hover {
+        transform: scale(1.1) !important;
+        border-color: #d1b48c !important;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.9), 0 0 25px rgba(209, 180, 140, 0.55) !important;
+    }
+
+    /* Floating Cart Popover (Bottom Right) */
+    div[data-testid="stElementContainer"]:has(#cart-anchor) + div[data-testid="stElementContainer"] {
+        position: fixed !important;
+        bottom: 24px !important;
+        right: 24px !important;
+        z-index: 999999 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+    div[data-testid="stElementContainer"]:has(#cart-anchor) + div[data-testid="stElementContainer"] div[data-testid="stPopover"] > button {
+        background: linear-gradient(135deg, #1d1813 0%, #0d0f15 100%) !important;
+        color: #e5cfab !important;
+        border: 2px solid #8c704f !important;
+        border-radius: 50% !important;
+        width: 62px !important;
+        height: 62px !important;
+        min-width: 62px !important;
+        max-width: 62px !important;
+        min-height: 62px !important;
+        max-height: 62px !important;
+        padding: 0 !important;
+        font-size: 1.35rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), 0 0 18px rgba(209, 180, 140, 0.3) !important;
+        cursor: pointer !important;
+        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+    }
+    div[data-testid="stElementContainer"]:has(#cart-anchor) + div[data-testid="stElementContainer"] div[data-testid="stPopover"] > button:hover {
+        transform: scale(1.1) !important;
+        border-color: #d1b48c !important;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.9), 0 0 25px rgba(209, 180, 140, 0.55) !important;
+    }
+
+    /* Popover Dialog Surfaces */
+    div[data-testid="stPopoverBody"] {
+        background-color: #0e1118 !important;
+        border: 1px solid #33271a !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 20px rgba(209, 180, 140, 0.15) !important;
+        border-radius: 8px !important;
+        color: #e8dfd5 !important;
+        width: 440px !important;
+        max-width: 92vw !important;
+    }
+
+    /* Dark Chat Styling inside Popover */
+    [data-testid="stChatMessage"] {
+        background-color: #121620 !important;
+        border: 1px solid #1c2230 !important;
+        border-radius: 6px !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Custom Form & Input Dark Theming */
+    .stTextInput input, .stSelectbox [data-baseweb="select"] {
+        background-color: #11141c !important;
+        border-color: #202636 !important;
+        color: #e8dfd5 !important;
+    }
+    .stTextInput input:focus, .stSelectbox [data-baseweb="select"]:focus {
+        border-color: #8c704f !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+# --- Acoustic Atelier Chime Notification ---
+components.html("""
+<script>
+function playAtelierChime() {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        const now = ctx.currentTime;
+        [659.25, 987.77].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.08, now + idx * 0.08 + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.85);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.9);
+        });
+    } catch(e) {}
+}
+
+try {
+    const targetDoc = window.parent ? window.parent.document : document;
+    if (!window.parent._atelierChimeInit) {
+        window.parent._atelierChimeInit = true;
+        targetDoc.addEventListener('pointerdown', function() {
+            if (!window.parent._atelierChimePlayed) {
+                playAtelierChime();
+                window.parent._atelierChimePlayed = true;
+            }
+        }, { once: true });
+    }
+} catch(e) {
+    playAtelierChime();
+}
+</script>
+""", height=0, width=0)
+
+
+# --- 1. Top Ribbon Information Bar ---
 ref_date = get_reference_date()
+cart_qty_total = sum(st.session_state.cart.values())
+
 st.markdown(f"""
-<div class="top-announcement">
-    <span>Empório da Música &bull; Campo Grande, MS &bull; Instrumentos Autênticos com Garantia e Atendimento Especializado</span>
+<div class="boutique-top-ribbon">
+    <div class="ribbon-group">
+        <span class="ribbon-item">📍 <strong>Rua 14 de Maio, 3200 &bull; Centro, Campo Grande/MS</strong></span>
+        <span class="ribbon-sep">|</span>
+        <span class="ribbon-item">🕒 Atendimento: <strong>Seg–Sex 09h às 18h &bull; Sáb 09h às 13h</strong></span>
+    </div>
+    <div class="ribbon-group">
+        <span class="ribbon-item">💳 <strong>5% OFF no PIX ou até 12x s/ juros</strong></span>
+        <span class="ribbon-sep">|</span>
+        <span class="ribbon-item">🛡️ Garantia: <strong>90 dias legal + Fabricante</strong></span>
+        <span class="ribbon-sep">|</span>
+        <span class="ribbon-item">📞 WhatsApp: <strong>(67) 3321-4500</strong></span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Header ---
-h_col1, h_col2 = st.columns([3, 1])
-with h_col1:
-    st.markdown("""
-    <div class="boutique-header" style="border:none; margin:0; padding:1.2rem 0 0.5rem 0;">
-        <div>
-            <h1 class="brand-title">Empório da Música</h1>
-            <div class="brand-subtitle">Atelier & Instrumentos Musicais Nobres &bull; Desde 2008</div>
-        </div>
+
+# --- 2. Brand Header ---
+st.markdown("""
+<div class="brand-header">
+    <div>
+        <h1 class="brand-title">Empório da Música</h1>
+        <div class="brand-tagline">Atelier & Acervo de Instrumentos Musicais Nobres &bull; Desde 2008</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with h_col2:
-    cart_count = sum(st.session_state.cart.values())
-    st.markdown(f"""
-    <div style="text-align: right; padding-top: 1.5rem;">
-        <span style="font-size: 0.85rem; color: #706254; font-weight: 500;">
-            👜 <strong>Sua Sacola:</strong> {cart_count} {('item' if cart_count == 1 else 'itens')}
-        </span>
+    <div style="font-size: 0.82rem; color: #a4adbd; letter-spacing: 0.06em;">
+        Atendimento e Luthieria Especializada em Campo Grande
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
 
-# --- Hero Editorial Banner ---
-hero_base64 = get_image_base64(HERO_IMG_PATH)
+# --- 3. Editorial Hero Presentation ---
+hero_base64 = get_hero_banner_base64()
 st.markdown(f"""
 <div class="hero-editorial">
     <div class="hero-content">
-        <div class="hero-tagline">Coleção Acústica &bull; Safra Exclusiva</div>
-        <h2 class="hero-headline">Onde a <em>tradição sonora</em> encontra a perfeição artesanal.</h2>
-        <p class="hero-copy">
-            Cada instrumento é minuciosamente inspecionado por nossa luthieria em Campo Grande. Madeiras nobres, timbres aveludados e a garantia de quem compreende a paixão de tocar.
+        <div class="hero-badge">Coleção Exclusiva de Luthieria</div>
+        <h2 class="hero-heading">A nobreza sonora talhada em <em>madeiras nobres</em>.</h2>
+        <p class="hero-text">
+            Do som cristalino dos violões dreadnought e clássicos concertistas às lendas elétricas e percussão de estúdio. Cada peça de nosso acervo passa por rigorosa calibragem técnica.
         </p>
-        <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a68;">
-            Consulte nosso Concierge Virtual no canto inferior para recomendações sob medida.
+        <div style="font-size: 0.8rem; color: #d1b48c; letter-spacing: 0.08em; text-transform: uppercase;">
+            Utilize os controles flutuantes no rodapé para consultar nosso Concierge de IA (🤖) ou acessar sua sacola (👜).
         </div>
     </div>
-    <div class="hero-image-wrap" style="background-image: url('{hero_base64}');"></div>
+    <div class="hero-bg-img" style="background-image: url('{hero_base64}');"></div>
 </div>
 """, unsafe_allow_html=True)
 
 
-# --- Luxury Ribbon Info Bar ---
-st.markdown(f"""
-<div class="luxury-ribbon">
-    <div class="ribbon-item">
-        <span>📍</span>
-        <span>Atelier: <strong>Rua 14 de Maio, 3200 &bull; Campo Grande, MS</strong></span>
-    </div>
-    <span class="ribbon-sep">|</span>
-    <div class="ribbon-item">
-        <span>🕒</span>
-        <span>Horário: <strong>Seg–Sex 09h–18h &bull; Sáb 09h–13h</strong></span>
-    </div>
-    <span class="ribbon-sep">|</span>
-    <div class="ribbon-item">
-        <span>💳</span>
-        <span>Condições: <strong>5% OFF no PIX ou até 12x s/ juros</strong></span>
-    </div>
-    <span class="ribbon-sep">|</span>
-    <div class="ribbon-item">
-        <span>🛡️</span>
-        <span>Garantia: <strong>90 dias CDC + Fabricante</strong></span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# --- Toast Alert ---
+# --- Toast Notification ---
 if st.session_state.toast_msg:
     st.toast(st.session_state.toast_msg, icon="✨")
     st.session_state.toast_msg = None
 
 
-# --- Filters & Search Bar ---
-filter_col1, filter_col2, filter_col3 = st.columns([2.2, 1.4, 1.4])
-categories = ["Todas"] + sorted(st.session_state.store.categories["name"].tolist())
+# --- 4. Search and Filter Bar ---
+filter_col1, filter_col2, filter_col3 = st.columns([2.4, 1.3, 1.3])
+categories_all = ["Todas"] + sorted(st.session_state.store.categories["name"].tolist())
 
 with filter_col1:
-    search_input = st.text_input("Buscar no catálogo", value=st.session_state.search_query, placeholder="Ex: Martin, Takamine GD20, Spruce, Violão Clássico...", label_visibility="collapsed")
-    st.session_state.search_query = search_input
+    search_text = st.text_input(
+        "Buscar no acervo",
+        value=st.session_state.search_query,
+        placeholder="Ex: Takamine GD20, Martin D-28, Fender, Nylon, Cedro...",
+        label_visibility="collapsed",
+    )
+    st.session_state.search_query = search_text
 
 with filter_col2:
-    cat_selected = st.selectbox("Categoria", categories, index=categories.index(st.session_state.selected_category) if st.session_state.selected_category in categories else 0, label_visibility="collapsed")
-    st.session_state.selected_category = cat_selected
+    cat_chosen = st.selectbox(
+        "Família",
+        categories_all,
+        index=categories_all.index(st.session_state.selected_category) if st.session_state.selected_category in categories_all else 0,
+        label_visibility="collapsed",
+    )
+    st.session_state.selected_category = cat_chosen
 
 with filter_col3:
-    price_val = st.slider("Preço até", min_value=150.0, max_value=25000.0, value=float(st.session_state.max_price), step=100.0, label_visibility="collapsed")
-    st.session_state.max_price = price_val
+    max_p = st.slider(
+        "Preço limite",
+        min_value=150.0,
+        max_value=25000.0,
+        value=float(st.session_state.max_price),
+        step=100.0,
+        label_visibility="collapsed",
+    )
+    st.session_state.max_price = max_p
 
 
-# --- Filter Products Dataset ---
-df_prods = st.session_state.store.products.copy()
+# --- 5. Catalog Grouped by Family Carousels ---
+# Filter products
+df_filtered = st.session_state.store.products.copy()
 
-if cat_selected != "Todas":
-    cat_match = st.session_state.store.categories[st.session_state.store.categories["name"] == cat_selected]
-    if not cat_match.empty:
-        df_prods = df_prods[df_prods["category_id"] == cat_match.iloc[0]["category_id"]]
+if cat_chosen != "Todas":
+    cat_rec = st.session_state.store.categories[st.session_state.store.categories["name"] == cat_chosen]
+    if not cat_rec.empty:
+        df_filtered = df_filtered[df_filtered["category_id"] == cat_rec.iloc[0]["category_id"]]
 
-if search_input:
-    s_term = search_input.strip().lower()
-    df_prods = df_prods[
-        df_prods["name"].str.lower().str.contains(s_term, na=False) |
-        df_prods["description"].str.lower().str.contains(s_term, na=False)
+if search_text:
+    term_l = search_text.strip().lower()
+    df_filtered = df_filtered[
+        df_filtered["name"].str.lower().str.contains(term_l, na=False) |
+        df_filtered["description"].str.lower().str.contains(term_l, na=False)
     ]
 
-df_prods = df_prods[df_prods["price_brl"] <= price_val]
-df_prods = df_prods.sort_values(by="price_brl")
+df_filtered = df_filtered[df_filtered["price_brl"] <= max_p]
 
+# Family groups according to brief:
+# Violões (35), Ukuleles (15), Guitarras (5), Baixos (4), Baterias (3), Teclados (3)
+category_order = [
+    "Violões",
+    "Ukuleles",
+    "Guitarras",
+    "Baixos",
+    "Baterias e Percussão",
+    "Teclados e Pianos",
+]
 
-# --- Main Area: Product Grid (3 cols) & Right Atelier Drawer ---
-grid_col, drawer_col = st.columns([2.85, 1.15])
+total_matching = len(df_filtered)
 
-with grid_col:
-    st.markdown(f"""
-    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.2rem; border-bottom: 1px solid #eae5dc; padding-bottom: 0.6rem;">
-        <h3 style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.8rem; margin:0; color: #1a1612;">
-            Acervo de Instrumentos
-        </h3>
-        <span style="font-size: 0.8rem; color: #8a7a68; letter-spacing: 0.05em;">
-            {len(df_prods)} instrumentos disponíveis
-        </span>
+if total_matching == 0:
+    st.markdown("""
+    <div style="text-align: center; padding: 4rem 1.5rem; color: #8e97a8;">
+        <h4 style="font-family:'Cormorant Garamond', Georgia, serif; font-size:1.8rem; color:#f7efe6;">Nenhum instrumento localizado</h4>
+        <p>Ajuste os filtros de busca ou preço para encontrar peças no acervo.</p>
     </div>
     """, unsafe_allow_html=True)
+else:
+    for cat_name in category_order:
+        cat_match = st.session_state.store.categories[st.session_state.store.categories["name"] == cat_name]
+        if cat_match.empty:
+            continue
+        c_id = cat_match.iloc[0]["category_id"]
+        group_df = df_filtered[df_filtered["category_id"] == c_id].sort_values(by="price_brl")
 
-    if df_prods.empty:
-        st.info("Nenhum instrumento encontrado com os critérios selecionados.")
-    else:
-        grid_rows = st.columns(3)
-        for idx, (_, row) in enumerate(df_prods.iterrows()):
-            p_id = int(row["product_id"])
-            p_name = html.escape(str(row["name"]))
-            p_price = float(row["price_brl"])
-            p_stock = int(row["stock_quantity"])
-            p_desc = html.escape(str(row["description"]))
-            p_cat = html.escape(str(st.session_state.store.get_category_name(int(row["category_id"]))))
-            p_promo = st.session_state.store.get_active_promotion(p_id)
-            p_status = str(row["status"])
-            p_specs = row.get("specs_parsed", {})
-
-            # Clean base64 image data URI
-            img_data_uri = get_product_image_data_uri(row["name"], st.session_state.store.get_category_name(int(row["category_id"])), p_specs)
-
-            with grid_rows[idx % 3]:
-                promo_badge = ""
-                price_render = f'<span class="atelier-price">{fmt_price(p_price)}</span>'
-
-                if p_promo:
-                    pct = p_promo["discount_percent"]
-                    final_val = p_price * (1 - pct / 100)
-                    promo_badge = f'<div class="atelier-badge-promo">{pct:.0f}% OFF &bull; {html.escape(p_promo["description"])}</div>'
-                    price_render = f'<div><span class="atelier-price-old">{fmt_price(p_price)}</span><span class="atelier-price" style="color: #9e2a2b;">{fmt_price(final_val)}</span></div>'
-
-                if p_status == "discontinued":
-                    stock_label = '<span class="atelier-stock" style="color:#b91c1c;">Peça fora de linha</span>'
-                elif p_status == "coming_soon":
-                    stock_label = '<span class="atelier-stock" style="color:#b45309;">Em preparação</span>'
-                elif p_stock <= 0:
-                    stock_label = '<span class="atelier-stock" style="color:#b91c1c;">Esgotado</span>'
-                elif p_stock <= 3:
-                    stock_label = f'<span class="atelier-stock" style="color:#b45309;">Resta apenas {p_stock}</span>'
-                else:
-                    stock_label = f'<span class="atelier-stock">{p_stock} disponíveis</span>'
-
-                clean_desc_text = p_desc[:105] + "..." if len(p_desc) > 105 else p_desc
-
-                card_markup = f"""
-                <div class="atelier-card">
-                    {promo_badge}
-                    <div class="atelier-img-container">
-                        <img src="{img_data_uri}" class="atelier-img" alt="{p_name}" loading="lazy"/>
-                    </div>
-                    <div class="atelier-body">
-                        <div class="atelier-cat">{p_cat}</div>
-                        <div class="atelier-name">{p_name}</div>
-                        <div class="atelier-desc">{clean_desc_text}</div>
-                        <div class="atelier-footer">
-                            {price_render}
-                            {stock_label}
-                        </div>
-                    </div>
-                </div>
-                """
-                st.markdown(card_markup, unsafe_allow_html=True)
-
-                btn1, btn2 = st.columns([1, 1])
-                with btn1:
-                    can_order = p_stock > 0 and p_status == "active"
-                    if st.button("Reservar", key=f"res_{p_id}", disabled=not can_order, use_container_width=True):
-                        st.session_state.cart[p_id] = st.session_state.cart.get(p_id, 0) + 1
-                        st.session_state.store.adjust_product_stock(p_id, -1)
-                        st.session_state.toast_msg = f"{p_name} adicionado à sua sacola!"
-                        st.rerun()
-
-                with btn2:
-                    if st.button("Consultar Luthier", key=f"ask_{p_id}", use_container_width=True):
-                        st.session_state.active_chat_prompt = f"Gostaria de uma consultoria técnica sobre o instrumento '{p_name}'. Qual o preço de tabela, especificações das madeiras e disponibilidade atual?"
-                        st.session_state.toast_msg = "Consultoria iniciada! Abra o Concierge no canto inferior direito."
-                        st.rerun()
-
-                st.write("")
-
-
-with drawer_col:
-    # --- Luxury Atelier Cart Simulation ---
-    st.markdown("""
-    <div class="cart-box">
-        <h4 class="cart-title">👜 Sacola de Compras</h4>
-    """, unsafe_allow_html=True)
-
-    if not st.session_state.cart:
-        st.markdown("<p style='font-size:0.83rem; color:#8a7a68; margin:0;'>Sua sacola de compras está vazia.</p>", unsafe_allow_html=True)
-    else:
-        subtotal_acc = 0.0
-        for c_id, qty in list(st.session_state.cart.items()):
-            item_prod = st.session_state.store.get_product_by_id(c_id)
-            if item_prod:
-                it_price = float(item_prod["price_brl"])
-                it_promo = st.session_state.store.get_active_promotion(c_id)
-                if it_promo:
-                    it_price = it_price * (1 - it_promo["discount_percent"] / 100)
-                it_sub = it_price * qty
-                subtotal_acc += it_sub
-
-                c_row1, c_row2 = st.columns([3, 1])
-                with c_row1:
-                    st.markdown(f"<span style='font-size:0.85rem; font-weight:600; color:#1a1612;'>{html.escape(item_prod['name'])}</span><br><span style='font-size:0.75rem; color:#8a7a68;'>{qty}x {fmt_price(it_price)}</span>", unsafe_allow_html=True)
-                with c_row2:
-                    if st.button("✕", key=f"del_it_{c_id}"):
-                        st.session_state.store.adjust_product_stock(c_id, qty)
-                        del st.session_state.cart[c_id]
-                        st.rerun()
-                st.write("")
+        if group_df.empty:
+            continue
 
         st.markdown(f"""
-        <div style="border-top: 1px solid #f0eae1; padding-top: 0.8rem; margin-top: 0.5rem;">
-            <div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.05rem; color:#1a1612;">
-                <span>Total:</span>
-                <span>{fmt_price(subtotal_acc)}</span>
-            </div>
-            <div style="font-size:0.76rem; color:#8a7a68; margin-top:0.2rem;">
-                À vista no PIX (5% desc.): <strong>{fmt_price(subtotal_acc * 0.95)}</strong>
-            </div>
+        <div class="section-editorial-header">
+            <h3 class="section-editorial-title">
+                <span>🎻</span> {cat_name}
+            </h3>
+            <span class="section-item-count">{len(group_df)} {('peça' if len(group_df) == 1 else 'peças')} em exposição &bull; Deslize para navegar &rarr;</span>
         </div>
         """, unsafe_allow_html=True)
 
-        if st.button("Concluir Pedido", use_container_width=True, type="primary"):
-            st.session_state.cart = {}
-            st.success("Pedido concluído! O estoque foi reservado na sessão.")
-            st.rerun()
+        # Build cards HTML for horizontal track
+        cards_html = ""
+        for _, prod_row in group_df.iterrows():
+            prod_id = int(prod_row["product_id"])
+            prod_name = html.escape(str(prod_row["name"]))
+            prod_price = float(prod_row["price_brl"])
+            prod_stock = int(prod_row["stock_quantity"])
+            prod_desc = html.escape(str(prod_row["description"]))
+            prod_status = str(prod_row["status"])
+            prod_promo = st.session_state.store.get_active_promotion(prod_id)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+            # Get image (validated webp or bespoke luxury SVG placeholder)
+            img_src = get_product_image_src(prod_id, prod_row["name"], cat_name)
 
-    # --- Live Inventory Lab (Auditing & Testing) ---
-    st.markdown("""
-    <div class="cart-box" style="margin-top: 1.2rem;">
-        <h4 class="cart-title">⚙️ Painel de Luthieria / Estoque</h4>
-        <p style="font-size:0.78rem; color:#8a7a68; margin-bottom: 0.8rem;">
-            Ajuste a quantidade em estoque para testar a reatividade imediata do Concierge de IA:
-        </p>
-    """, unsafe_allow_html=True)
+            # Price and Promo
+            if prod_promo:
+                pct = prod_promo["discount_percent"]
+                final_val = prod_price * (1 - pct / 100)
+                promo_tag = f'<div class="card-badge-promo">{pct:.0f}% OFF &bull; {html.escape(prod_promo["description"])}</div>'
+                price_html = f'<div><span class="card-price-old">{fmt_price(prod_price)}</span><span class="card-price" style="color:#d97736;">{fmt_price(final_val)}</span></div>'
+            else:
+                promo_tag = ""
+                price_html = f'<span class="card-price">{fmt_price(prod_price)}</span>'
 
-    all_item_names = st.session_state.store.products["name"].tolist()
-    sel_inst = st.selectbox("Selecione o instrumento:", all_item_names, key="sel_stock_inst", label_visibility="collapsed")
-    p_matched = st.session_state.store.products[st.session_state.store.products["name"] == sel_inst].iloc[0]
-    p_cur_stock = int(p_matched["stock_quantity"])
+            # Stock and availability
+            if prod_status == "discontinued":
+                stock_tag = '<span class="card-stock-label" style="color:#b91c1c;">Fora de Linha</span>'
+                action_btn = '<span class="btn-boutique-disabled">Fora de Linha</span>'
+            elif prod_status == "coming_soon":
+                stock_tag = '<span class="card-stock-label" style="color:#b45309;">Em Breve</span>'
+                action_btn = '<span class="btn-boutique-disabled">Em Breve</span>'
+            elif prod_stock <= 0:
+                stock_tag = '<span class="card-stock-label" style="color:#b91c1c;">Esgotado</span>'
+                action_btn = '<span class="btn-boutique-disabled">Esgotado</span>'
+            elif prod_stock <= 3:
+                stock_tag = f'<span class="card-stock-label" style="color:#b45309;">Resta {prod_stock}</span>'
+                action_btn = f'<a href="?add_to_cart={prod_id}" target="_self" class="btn-boutique-add">+ Sacola</a>'
+            else:
+                stock_tag = f'<span class="card-stock-label" style="color:#637189;">{prod_stock} em acervo</span>'
+                action_btn = f'<a href="?add_to_cart={prod_id}" target="_self" class="btn-boutique-add">+ Sacola</a>'
 
-    st_col1, st_col2 = st.columns([1.2, 1])
-    with st_col1:
-        new_qty = st.number_input("Qtd:", min_value=0, max_value=999, value=p_cur_stock, key=f"q_{p_matched['product_id']}", label_visibility="collapsed")
-    with st_col2:
-        if st.button("Atualizar", key="btn_update_stock", use_container_width=True):
-            st.session_state.store.update_product_stock(int(p_matched["product_id"]), int(new_qty))
-            st.session_state.toast_msg = f"Estoque de '{sel_inst}' atualizado para {new_qty}!"
-            st.rerun()
+            consult_btn = f'<a href="?consult_prod={prod_id}" target="_self" class="btn-boutique-consult">Consultar</a>'
 
-    st.markdown("</div>", unsafe_allow_html=True)
+            # Pure HTML card without unescaped tags
+            cards_html += f"""
+            <div class="boutique-card">
+                {promo_tag}
+                <div class="card-img-container">
+                    <img src="{img_src}" class="card-img" alt="{prod_name}" loading="lazy"/>
+                </div>
+                <div class="card-body">
+                    <div class="card-category">{cat_name}</div>
+                    <div class="card-title">{prod_name}</div>
+                    <div class="card-desc">{prod_desc}</div>
+                    <div class="card-price-row">
+                        {price_html}
+                        {stock_tag}
+                    </div>
+                </div>
+                <div class="card-actions">
+                    {action_btn}
+                    {consult_btn}
+                </div>
+            </div>
+            """
+
+        # Wrap in carousel track
+        carousel_markup = f"""
+        <div class="carousel-track">
+            {cards_html}
+        </div>
+        """
+        st.markdown(carousel_markup, unsafe_allow_html=True)
 
 
 # =========================================================
-# FLOATING CONCIERGE ATELIER POPUP (BOTÃO CIRCULAR DE LUXO)
+# FLOATING WIDGET 1: AGENTE DE IA CONCIERGE (CANTO INFERIOR ESQUERDO)
 # =========================================================
-with st.popover("🎻", use_container_width=False):
+st.markdown('<div id="concierge-anchor"></div>', unsafe_allow_html=True)
+
+with st.popover("🤖", use_container_width=False, help="Consultor Virtual Especializado (Concierge de Luthieria)"):
     st.markdown("""
-    <div style="border-bottom: 1px solid #eae5dc; padding-bottom: 0.8rem; margin-bottom: 0.8rem;">
-        <div style="font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: #9e7d56; font-weight: 600;">
+    <div style="border-bottom: 1px solid #232a3b; padding-bottom: 0.8rem; margin-bottom: 0.8rem;">
+        <div style="font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: #d1b48c; font-weight: 600;">
             Atendimento Especializado
         </div>
-        <h4 style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; margin: 0.2rem 0 0 0; color: #1a1612;">
-            Consultor Empório da Música
+        <h4 style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; margin: 0.2rem 0 0 0; color: #f7efe6;">
+            Concierge Empório da Música
         </h4>
-        <div style="font-size: 0.78rem; color: #706254; margin-top: 0.2rem;">
-            Consultoria de timbres, madeiras nobres, disponibilidade em tempo real e políticas.
+        <div style="font-size: 0.78rem; color: #8e97a8; margin-top: 0.2rem;">
+            Consultoria sobre madeiras nobres, timbres, estoque e regras de garantia.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     if not st.session_state.chatbot_ready:
-        st.error(f"Sistema de consultoria temporariamente indisponível: {st.session_state.get('chatbot_error', 'Verifique a chave de API.')}")
+        st.error(f"Concierge temporariamente indisponível: {st.session_state.get('chatbot_error', 'Verifique a chave de API.')}")
     else:
-        # Quick prompts
-        st.markdown("<div style='font-size:0.75rem; color:#8a7a68; margin-bottom:0.4rem;'>Sugestões de consulta:</div>", unsafe_allow_html=True)
+        # Quick suggestions
+        st.caption("Consultas rápidas recomendadas:")
         q_cols = st.columns(2)
         with q_cols[0]:
-            if st.button("🎻 Violões até R$ 1.000", key="sug_violao", use_container_width=True):
+            if st.button("🎻 Violões até R$ 1.000", key="quick_violao", use_container_width=True):
                 st.session_state.active_chat_prompt = "Quais opções de violões disponíveis vocês têm custando até R$ 1.000?"
                 st.rerun()
         with q_cols[1]:
-            if st.button("🏷️ Promoções ativas", key="sug_promos", use_container_width=True):
+            if st.button("🏷️ Promoções ativas", key="quick_promos", use_container_width=True):
                 st.session_state.active_chat_prompt = "Quais instrumentos estão com promoção ativa no momento?"
                 st.rerun()
 
-        # Chat Conversation Window
-        chat_flow = st.container(height=360)
+        # Chat container
+        chat_box = st.container(height=360)
 
-        with chat_flow:
+        with chat_box:
             if not st.session_state.messages:
-                welcome_editorial = (
+                welcome_msg = (
                     "Olá! Seja muito bem-vindo(a) ao **Empório da Música**.\n\n"
-                    "Sou o consultor virtual da loja. Posso auxiliá-lo(a) a encontrar o instrumento ideal para o seu perfil musical, "
-                    "verificar especificações de madeiras e timbres, consultar nosso estoque em tempo real ou esclarecer dúvidas "
-                    "sobre condições de pagamento e políticas de garantia.\n\n"
-                    "Em que posso servi-lo(a) hoje?"
+                    "Sou o consultor virtual da casa. Posso auxiliá-lo(a) a escolher o instrumento ideal, "
+                    "verificar características de construção e timbres, consultar a disponibilidade em nosso acervo "
+                    "ou esclarecer dúvidas sobre condições de pagamento e garantias.\n\n"
+                    "Como posso servi-lo(a) hoje? 🎵"
                 )
                 with st.chat_message("assistant", avatar="🎻"):
-                    st.markdown(welcome_editorial)
+                    st.markdown(welcome_msg)
 
-            for m in st.session_state.messages:
-                with st.chat_message(m["role"], avatar="🎻" if m["role"] == "assistant" else None):
-                    st.markdown(m["content"])
+            for msg in st.session_state.messages:
+                with st.chat_message(msg["role"], avatar="🎻" if msg["role"] == "assistant" else None):
+                    st.markdown(msg["content"])
 
-        # Input Handling
-        pre_input = None
+        # Input handling
+        pre_prompt = None
         if "active_chat_prompt" in st.session_state and st.session_state.active_chat_prompt:
-            pre_input = st.session_state.active_chat_prompt
+            pre_prompt = st.session_state.active_chat_prompt
             del st.session_state.active_chat_prompt
 
-        typed_query = st.chat_input("Pergunte ao consultor de luthieria...", key="chat_concierge_input")
+        chat_input = st.chat_input("Consulte o concierge de luthieria...", key="concierge_chat_input")
+        prompt_to_dispatch = chat_input or pre_prompt
 
-        action_query = typed_query or pre_input
+        if prompt_to_dispatch:
+            st.session_state.messages.append({"role": "user", "content": prompt_to_dispatch})
 
-        if action_query:
-            st.session_state.messages.append({"role": "user", "content": action_query})
-
-            with chat_flow:
+            with chat_box:
                 with st.chat_message("user"):
-                    st.markdown(action_query)
+                    st.markdown(prompt_to_dispatch)
 
                 with st.chat_message("assistant", avatar="🎻"):
-                    with st.spinner("Consultando acervo e luthieria..."):
+                    with st.spinner("Consultando acervo..."):
                         try:
-                            response_text = st.session_state.chatbot.send_message(action_query)
-                            st.markdown(response_text)
-                            st.session_state.messages.append({"role": "assistant", "content": response_text})
+                            reply = st.session_state.chatbot.send_message(prompt_to_dispatch)
+                            st.markdown(reply)
+                            st.session_state.messages.append({"role": "assistant", "content": reply})
                         except Exception as ex:
-                            err_txt = f"Desculpe, ocorreu uma instabilidade na consulta: {str(ex)}"
-                            st.error(err_txt)
-                            st.session_state.messages.append({"role": "assistant", "content": err_txt})
+                            err_msg = f"Desculpe, ocorreu uma instabilidade: {str(ex)}"
+                            st.error(err_msg)
+                            st.session_state.messages.append({"role": "assistant", "content": err_msg})
+            st.rerun()
+
+
+# =========================================================
+# FLOATING WIDGET 2: SACOLA DE COMPRAS (CANTO INFERIOR DIREITO)
+# =========================================================
+st.markdown('<div id="cart-anchor"></div>', unsafe_allow_html=True)
+
+with st.popover(f"👜 {cart_qty_total}", use_container_width=False, help="Sacola de Compras e Reserva"):
+    st.markdown("""
+    <div style="border-bottom: 1px solid #232a3b; padding-bottom: 0.6rem; margin-bottom: 0.8rem;">
+        <h4 style="font-family:'Cormorant Garamond', Georgia, serif; font-size:1.5rem; margin:0; color:#f7efe6;">
+            👜 Sua Sacola
+        </h4>
+        <span style="font-size:0.76rem; color:#8e97a8;">Simulação de checkout e reserva de acervo</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if not st.session_state.cart:
+        st.markdown("<p style='font-size:0.84rem; color:#8e97a8;'>Sua sacola de compras está vazia.</p>", unsafe_allow_html=True)
+    else:
+        order_sum = 0.0
+        for cart_pid, q_ordered in list(st.session_state.cart.items()):
+            p_obj = st.session_state.store.get_product_by_id(cart_pid)
+            if p_obj:
+                prc = float(p_obj["price_brl"])
+                prm = st.session_state.store.get_active_promotion(cart_pid)
+                if prm:
+                    prc = prc * (1 - prm["discount_percent"] / 100)
+                sub_val = prc * q_ordered
+                order_sum += sub_val
+
+                row_c1, row_c2 = st.columns([3, 1])
+                with row_c1:
+                    st.markdown(f"**{html.escape(p_obj['name'])}**<br><small style='color:#8e97a8;'>{q_ordered}x {fmt_price(prc)}</small>", unsafe_allow_html=True)
+                with row_c2:
+                    if st.button("✕", key=f"cart_del_{cart_pid}"):
+                        st.session_state.store.adjust_product_stock(cart_pid, q_ordered)
+                        del st.session_state.cart[cart_pid]
+                        st.rerun()
+                st.write("")
+
+        st.markdown(f"""
+        <div style="border-top: 1px solid #232a3b; padding-top: 0.8rem; margin-top: 0.5rem;">
+            <div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.1rem; color:#f7efe6;">
+                <span>Total:</span>
+                <span>{fmt_price(order_sum)}</span>
+            </div>
+            <div style="font-size:0.78rem; color:#d1b48c; margin-top:0.3rem;">
+                À vista no PIX (5% desc.): <strong>{fmt_price(order_sum * 0.95)}</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("Concluir Reserva de Acervo", use_container_width=True, type="primary"):
+            st.session_state.cart = {}
+            st.success("Reserva confirmada com sucesso! Itens alocados na sessão.")
             st.rerun()

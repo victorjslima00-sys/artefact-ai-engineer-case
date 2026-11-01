@@ -1,6 +1,6 @@
 """
 Data loader module for the Empório da Música chatbot.
-Loads, cleans and provides access to all CSV data files.
+Loads, cleans and provides access to all CSV data files, with support for in-memory stock mutations.
 """
 
 import json
@@ -85,6 +85,7 @@ class DataStore:
     """
     Centralized data store that loads all tables once and provides
     convenient access for the agent's tools.
+    Supports in-memory mutations (e.g. stock updates from cart/simulation).
     """
 
     def __init__(self) -> None:
@@ -142,3 +143,28 @@ class DataStore:
                 return phone_match.iloc[0].to_dict()
 
         return None
+
+    def update_product_stock(self, product_id: int, new_quantity: int) -> bool:
+        """Update in-memory product stock quantity directly."""
+        mask = self.products["product_id"] == product_id
+        if not mask.any():
+            return False
+        self.products.loc[mask, "stock_quantity"] = int(new_quantity)
+        return True
+
+    def adjust_product_stock(self, product_id: int, delta: int) -> Optional[int]:
+        """Adjust product stock by delta (positive or negative). Returns new quantity."""
+        mask = self.products["product_id"] == product_id
+        if not mask.any():
+            return None
+        current = int(self.products.loc[mask, "stock_quantity"].iloc[0])
+        new_qty = max(0, current + delta)
+        self.products.loc[mask, "stock_quantity"] = new_qty
+        return new_qty
+
+    def get_product_by_id(self, product_id: int) -> Optional[dict]:
+        """Return a single product row as a dict, or None."""
+        match = self.products[self.products["product_id"] == product_id]
+        if match.empty:
+            return None
+        return match.iloc[0].to_dict()

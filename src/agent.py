@@ -106,9 +106,9 @@ class EmporioChatbot:
     Chatbot agent for Empório da Música using Gemini with function calling.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, store: Optional[DataStore] = None) -> None:
         self.client = genai.Client(api_key=GEMINI_API_KEY)
-        self.store = DataStore()
+        self.store = store if store is not None else DataStore()
         self.history: list[dict] = []
 
         # Build system prompt with current reference date

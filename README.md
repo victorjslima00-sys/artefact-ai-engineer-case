@@ -35,9 +35,14 @@ The agent uses a **hybrid architecture** that separates two types of knowledge:
 | Alternative considered | GPT-4o-mini, Claude Haiku | Good quality but not free |
 | Alternative considered | Local model (Ollama) | Zero API cost but harder to reproduce |
 
-### Interface: Streamlit
+### Interface: Modern E-Commerce Storefront + Floating AI Assistant
 
-A visual chat interface using Streamlit's native `st.chat_message` component. While the assignment states "the focus is on the agent working correctly," a polished UI improves the evaluation experience and makes it trivial to capture example conversations.
+Rather than a barebones chatbot dialog box, the project features a **full-fledged interactive storefront** for Empório da Música:
+- **Interactive Product Catalog**: Grid of instruments with active promotion tags, stock availability badges, and instant specs.
+- **Light & Dark Mode**: One-click theme toggle with dedicated palettes for comfortable viewing.
+- **Soft Info Pills**: Elegant floating banners displaying business hours, payment conditions, warranty details, and direct contact info without obtrusive sidebars.
+- **Cart & Dynamic Stock Simulation**: Users can add instruments to their cart or test arbitrary inventory updates (e.g. changing stock from 12 to 56, or to 0). The in-memory `DataStore` dynamically updates and the agent's function-calling tools reflect the new numbers in real time.
+- **Integrated Chat Popover**: Non-obtrusive floating assistant widget that can be opened on demand or triggered directly by clicking "Consultar" on any product card.
 
 ### Conversation History: Last 8 Messages
 

@@ -1,0 +1,21 @@
+# Environment
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs (internal only)
+docs/registro_eu.md
+docs/registro_tecnico.md

@@ -182,6 +182,7 @@ The following ambiguities were identified in the provided materials. For each, a
 - **Simple customer identification**: uses phone/email lookup; a production system would use authenticated sessions
 - **No order creation**: the agent can only query existing orders, not create new ones
 - **Single language**: the agent responds in Portuguese (pt-BR) as appropriate for the store's customer base
+- **Customer-reported delivery date**: the agent relies on the receipt date reported by the customer, since the dataset has no actual delivery date and there is no carrier integration; in production this date would come from the logistics system.
 
 ### What I Would Do With More Time
 

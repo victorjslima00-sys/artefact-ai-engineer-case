@@ -125,7 +125,7 @@ class EmporioChatbot:
     """
 
     def __init__(self, store: Optional[DataStore] = None) -> None:
-        self.client = genai.Client(api_key=GEMINI_API_KEY)
+        self._client: Optional[genai.Client] = None
         self.store = store if store is not None else DataStore()
         self.history: list[dict] = []
 
@@ -142,6 +142,13 @@ class EmporioChatbot:
             "check_order_status": lambda **kwargs: check_order_status(self.store, **kwargs),
             "list_active_promotions": lambda **kwargs: list_active_promotions(self.store),
         }
+
+    @property
+    def client(self) -> genai.Client:
+        """Lazily instantiate the Gemini client only when needed."""
+        if self._client is None:
+            self._client = genai.Client(api_key=GEMINI_API_KEY)
+        return self._client
 
     def _build_tools(self) -> list:
         """Build the tool declarations in the format expected by Gemini."""

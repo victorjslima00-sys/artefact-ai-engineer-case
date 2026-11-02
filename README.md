@@ -74,8 +74,6 @@ artefact-ai-engineer-case/
 ├── requirements.txt        # Python dependencies
 ├── .env.example            # Environment variables template
 ├── .gitignore
-├── .streamlit/             # Streamlit configuration
-│   └── config.toml
 ├── data/                   # Store data (CSVs + policy PDF)
 │   ├── desafio_tecnico_ai_eng - categories.csv
 │   ├── desafio_tecnico_ai_eng - customers.csv
@@ -86,29 +84,18 @@ artefact-ai-engineer-case/
 │   └── políticas_da_loja.pdf
 ├── src/
 │   ├── __init__.py
-│   ├── config.py           # Configuration & environment variables
+│   ├── config.py           # Configuration, timezone & store hours
 │   ├── data_loader.py      # Data loading, cleaning & DataStore class
-│   ├── image_helper.py     # Image helper utilities
-│   ├── image_resolver.py   # Product image resolver
 │   ├── tools.py            # Agent tools (function calling implementations)
 │   └── agent.py            # Chatbot agent with Gemini integration
-├── scripts/                # Utility scripts for catalog and images
-│   ├── export_catalog.py
-│   ├── fetch_catalog_images.py
-│   └── process_catalog_manifest.py
-├── static/                 # Static assets and catalog imagery
-│   └── images/
-├── docs/                   # Documentation and reference manifests
+├── docs/
 │   ├── relacao_instrumentos.md
-│   ├── registro_agentes.md
-│   ├── emporio_catalogo_imagens_candidatas.csv
-│   ├── emporio_catalogo_imagens_candidatas.json
-│   ├── emporio_galeria_fotos_candidatas.html
-│   ├── emporio_relatorio_fotos_candidatas.md
-│   └── manifesto_imagens_local.json
-├── tests/                  # Automated test suite
+│   └── registro_agentes.md
+├── tests/
 │   ├── test_order_return_eligibility.py
-│   └── test_realtime_stock_sync.py
+│   ├── test_realtime_stock_sync.py
+│   ├── test_store_schedule.py
+│   └── test_tools_enhancements.py
 └── examples/               # Example conversations (5)
     ├── 01_catalog_query.md
     ├── 02_store_info.md

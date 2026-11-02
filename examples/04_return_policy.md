@@ -1,6 +1,6 @@
 # Example 4 — Return Policy Application (Non-Trivial)
 
-> **Scenario**: A customer wants to return a purchase. The agent must: (1) identify the customer via phone/email for LGPD compliance, (2) look up the order, (3) acknowledge that return eligibility is marked as `provisional` based on the estimated delivery date and ask to confirm the actual delivery date, and (4) properly apply the CDC 7-day return policy once the actual date is confirmed.
+> **Scenario**: A customer wants to return a purchase. The agent must: (1) identify the customer via phone/email for LGPD compliance, (2) look up the order, (3) acknowledge that the initial return check uses an estimated delivery date and ask to confirm the actual delivery date, and (4) explain the CDC 7-day return policy and forward the case to the store team without promising direct system execution.
 
 > **Note**: This example uses `REFERENCE_DATE=2026-03-25` to demonstrate return eligibility with the sample data.
 
@@ -8,26 +8,24 @@
 
 **Customer**: Me arrependi da minha compra, posso devolver meu pedido?
 
-**Agent**: Olá! Claro, posso te ajudar com isso. 
+**Agent**: Com certeza! O direito de arrependimento para compras online é garantido: você pode devolver o produto em até **7 dias corridos** após o recebimento, desde que ele esteja na embalagem original e sem uso. Nesse caso, o frete da devolução é por nossa conta e o reembolso é feito em até 10 dias úteis na mesma forma de pagamento da compra.
 
-Para verificar a elegibilidade da devolução por arrependimento, por favor, me informe o seu **telefone ou e-mail cadastrado** e a **data em que você recebeu o produto** (ou o número do pedido, se lembrar). 
-
-Assim que você me passar esses dados, confiro tudo para você! 😊
+Para que eu possa verificar a situação exata do seu pedido e te orientar direitinho, **poderia me informar o seu telefone ou e-mail cadastrado na compra?** 🎸
 
 **Customer**: Meu email é leticia.rocha@jmail.com
 
-**Agent**: Olá, Letícia! Vi aqui que o seu pedido do **Ukulele Shelby SU-21S Soprano Sunburst** foi entregue. 
+**Agent**: Olá, Letícia! Encontrei o seu pedido aqui (o ukulelê Shelby SU-21S). 
 
-Como a nossa regra de arrependimento permite a devolução em até **7 dias corridos após o recebimento**, e o cálculo aproximado com base na data de entrega estimada (17/02/2026) indica que esse prazo já passou, a princípio o pedido consta como não elegível por prazo (`provisional`). 
+Como a entrega foi estimada para meados de fevereiro, pelas nossas contas o prazo de 7 dias para arrependimento já teria passado. Mas olha só: esse cálculo inicial usa uma data estimada, então **você lembra exatamente em qual dia recebeu o instrumento em casa?** 
 
-Para termos certeza absoluta: você lembra exatamente em qual data recebeu o pacote em sua casa? Se a entrega aconteceu recentemente (dentro dos últimos 7 dias corridos), me avise para eu verificar se conseguimos abrir uma exceção ou ajustar a data real no sistema para você! 😊
+Se você tiver recebido recentemente e a data real estiver dentro do prazo, ou se houver qualquer outra questão, me avise a data certinha para eu encaminhar o seu caso para a nossa equipe de atendimento avaliar com todo o carinho, combinado? 🎸
 
-**Customer**: Recebi no dia 22/03/2026!
+**Customer**: Recebi no dia 22/03/2026
 
-**Agent**: Ah, perfeito, Letícia! Muito obrigado por confirmar a data. 
+**Agent**: Muito obrigado pela informação, Letícia! 
 
-Como você recebeu o produto no dia **22/03/2026** (domingo passado) e hoje é dia 25/03/2026, você está super dentro do prazo de **7 dias corridos** do direito de arrependimento da compra online! 🎉
+Com essa data de recebimento (22/03/2026), você está dentro do prazo de 7 dias corridos do direito de arrependimento (que vai até 29/03/2026). 
 
-Para realizarmos a devolução, o instrumento precisa estar na embalagem original e sem nenhum sinal de uso, combinado? O frete de devolução fica por nossa conta e, assim que o produto chegar e passar pela nossa conferência, o reembolso é feito em até 10 dias úteis na mesma forma de pagamento da compra.
+Como eu sou um assistente virtual e não consigo iniciar o processo de devolução diretamente pelo sistema, **já anotei todos os detalhes aqui e vou encaminhar o seu caso imediatamente para a nossa equipe de atendimento**. Eles entrarão em contato com você o mais rápido possível para orientar sobre a postagem e os próximos passos para o reembolso.
 
-Você quer que eu inicie o processo de solicitação da devolução agora mesmo para você? 😊
+Fica tranquila que vai dar tudo certo! Se precisar de mais alguma coisa é só chamar. 🎵

@@ -30,19 +30,17 @@ The agent uses a **hybrid architecture** that separates two types of knowledge:
 
 | Criterion | Choice | Reason |
 |---|---|---|
-| Model | `gemini-3.5-flash-lite` | Free tier, native function calling support |
+| Model | `gemini-2.0-flash-lite` | Free tier, native function calling support |
 | Provider | Google AI Studio | Zero cost; evaluator only needs a free API key |
 | Alternative considered | GPT-4o-mini, Claude Haiku | Good quality but not free |
 | Alternative considered | Local model (Ollama) | Zero API cost but harder to reproduce |
 
-### Interface: Modern E-Commerce Storefront + Floating AI Assistant
+### Interface: Streamlit Chat Interface
 
-Rather than a barebones chatbot dialog box, the project features a **full-fledged interactive storefront** for Empório da Música:
-- **Interactive Product Catalog**: Grid of instruments with active promotion tags, stock availability badges, and instant specs.
-- **Light & Dark Mode**: One-click theme toggle with dedicated palettes for comfortable viewing.
-- **Soft Info Pills**: Elegant floating banners displaying business hours, payment conditions, warranty details, and direct contact info without obtrusive sidebars.
-- **Cart & Dynamic Stock Simulation**: Users can add instruments to their cart or test arbitrary inventory updates (e.g. changing stock from 12 to 56, or to 0). The in-memory `DataStore` dynamically updates and the agent's function-calling tools reflect the new numbers in real time.
-- **Integrated Chat Popover**: Non-obtrusive floating assistant widget that can be opened on demand or triggered directly by clicking "Consultar" on any product card.
+The project features a clean, responsive conversational chat interface powered by Streamlit:
+- **Focused Chat Experience**: Directly connects the customer to the virtual music concierge.
+- **Session History**: Preserves context across multi-turn interactions.
+- **Real-Time Data Grounding**: Answers are dynamically grounded in the store's inventory, promotions, and orders via tool calling.
 
 ### Conversation History: Last 8 Messages
 
@@ -72,7 +70,7 @@ The `REFERENCE_DATE` environment variable allows setting a custom date for testi
 
 ```
 emporio-da-musica-chatbot/
-├── app.py                  # Streamlit UI
+├── app.py                  # Streamlit chat interface
 ├── requirements.txt        # Python dependencies
 ├── .env.example            # Environment variables template
 ├── .gitignore
@@ -90,7 +88,13 @@ emporio-da-musica-chatbot/
 │   ├── data_loader.py      # Data loading, cleaning & DataStore class
 │   ├── tools.py            # Agent tools (function calling implementations)
 │   └── agent.py            # Chatbot agent with Gemini integration
-└── examples/               # Example conversations (3-5)
+├── docs/
+│   ├── relacao_instrumentos.md   # Reference list of all 65 products
+│   └── registro_agentes.md      # Agent activity log
+├── tests/
+│   ├── test_order_return_eligibility.py  # Return window calculation tests
+│   └── test_realtime_stock_sync.py       # Real-time stock sync tests
+└── examples/               # Example conversations (5)
     ├── 01_catalog_query.md
     ├── 02_store_info.md
     ├── 03_price_and_promotion.md

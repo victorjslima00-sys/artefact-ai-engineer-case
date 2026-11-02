@@ -3,11 +3,56 @@ Tools module for the Empório da Música chatbot.
 Defines the functions the agent can call to query structured data.
 """
 
+import unicodedata
 from datetime import date, timedelta
 from typing import Optional
 
 from src.config import get_reference_date
 from src.data_loader import DataStore
+
+
+def _normalize_text(text: str) -> str:
+    """Normalize text: lowercase, remove accents and extra spaces."""
+    if not text:
+        return ""
+    nfd = unicodedata.normalize("NFD", text.lower())
+    without_accents = "".join(c for c in nfd if unicodedata.category(c) != "Mn")
+    return without_accents.strip()
+
+
+def _normalize_plural_singular(text: str) -> str:
+    """Stem common Portuguese singular/plural variations for instrument categories."""
+    norm = _normalize_text(text)
+    # Special endings
+    if norm.endswith("oes"):  # violoes -> violao
+        norm = norm[:-3] + "ao"
+    elif norm.endswith("es"):
+        norm = norm[:-2]
+    elif norm.endswith("s") and not norm.endswith("as") and not norm.endswith("is"):
+        norm = norm[:-1]
+    return norm
+
+
+def _calculate_max_installments(price: float) -> int:
+    """
+    Calculate maximum installments based on store policy:
+    - up to 3x: without minimum installment, except below R$ 50.00
+    - 4x to 6x: minimum installment R$ 80.00
+    - 7x to 12x: minimum installment R$ 100.00
+    """
+    max_inst = 1
+    for n in range(2, 13):
+        installment_val = price / n
+        if n <= 3:
+            if installment_val >= 50.0:
+                max_inst = n
+        elif 4 <= n <= 6:
+            if installment_val >= 80.0:
+                max_inst = n
+        elif 7 <= n <= 12:
+            if installment_val >= 100.0:
+                max_inst = n
+    return max_inst
 
 
 def _format_price(value: float) -> str:
@@ -20,12 +65,13 @@ def _product_summary(row, store: DataStore, include_specs: bool = False) -> dict
     product_id = int(row["product_id"])
     promo = store.get_active_promotion(product_id)
     category = store.get_category_name(int(row["category_id"]))
+    price_val = float(row["price_brl"])
 
     summary = {
         "product_id": product_id,
         "name": row["name"],
         "category": category,
-        "price": _format_price(float(row["price_brl"])),
+        "price": _format_price(price_val),
         "status": row["status"],
         "stock": int(row["stock_quantity"]),
         "description": row["description"],
@@ -35,14 +81,20 @@ def _product_summary(row, store: DataStore, include_specs: bool = False) -> dict
         summary["specs"] = row["specs_parsed"]
 
     if promo:
-        original = float(row["price_brl"])
-        discounted = original * (1 - promo["discount_percent"] / 100)
+        discounted = price_val * (1 - promo["discount_percent"] / 100)
         summary["promotion"] = {
             "description": promo["description"],
             "discount": f"{promo['discount_percent']:.0f}%",
-            "original_price": _format_price(original),
+            "original_price": _format_price(price_val),
             "promotional_price": _format_price(discounted),
         }
+        # Desconto do PIX NÃO se aplica sobre preço promocional
+    else:
+        # Produtos sem promoção ativa: inclui pix_price (5% off tabela) e parcelamento
+        pix_price_val = price_val * 0.95
+        max_inst = _calculate_max_installments(price_val)
+        summary["pix_price"] = _format_price(pix_price_val)
+        summary["max_installments"] = f"{max_inst}x sem juros"
 
     if row["status"] == "discontinued":
         summary["note"] = "Este produto foi descontinuado e não está mais disponível para venda."
@@ -76,11 +128,20 @@ def search_products(
         df = df[(df["status"] == "active") & (df["stock_quantity"] > 0)]
 
     if category:
-        cat_lower = category.lower()
-        cat_match = store.categories[store.categories["name"].str.lower().str.contains(cat_lower, na=False)]
-        if not cat_match.empty:
-            cat_ids = cat_match["category_id"].tolist()
-            df = df[df["category_id"].isin(cat_ids)]
+        cat_norm = _normalize_text(category)
+        cat_stem = _normalize_plural_singular(category)
+        
+        # Check direct substring matching on normalized category names
+        matching_ids = []
+        for _, cat_row in store.categories.iterrows():
+            c_name = cat_row["name"]
+            c_norm = _normalize_text(c_name)
+            c_stem = _normalize_plural_singular(c_name)
+            if cat_norm in c_norm or cat_stem in c_norm or cat_stem in c_stem:
+                matching_ids.append(cat_row["category_id"])
+
+        if matching_ids:
+            df = df[df["category_id"].isin(matching_ids)]
         else:
             return {"results": [], "message": f"Categoria '{category}' não encontrada. Categorias disponíveis: {', '.join(store.categories['name'].tolist())}"}
 

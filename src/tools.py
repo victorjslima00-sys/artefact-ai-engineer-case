@@ -89,6 +89,7 @@ def _product_summary(row, store: DataStore, include_specs: bool = False) -> dict
             "promotional_price": _format_price(discounted),
         }
         # Desconto do PIX NÃO se aplica sobre preço promocional
+        summary["max_installments"] = f"{_calculate_max_installments(discounted)}x sem juros"
     else:
         # Produtos sem promoção ativa: inclui pix_price (5% off tabela) e parcelamento
         pix_price_val = price_val * 0.95

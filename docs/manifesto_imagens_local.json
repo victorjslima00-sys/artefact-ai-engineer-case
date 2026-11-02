@@ -1,0 +1,233 @@
+[
+  {
+    "id": 133,
+    "name": "PRS SE Custom 24",
+    "image_path": null,
+    "source_url": "https://meibergen.nl/product/prs-se-custom-24-turquoise-elektrische-gitaar-inclusief-gig-bag/",
+    "image_url": "https://meibergen.nl/site/assets/files/31076/se_custom_24_turquoise.jpg",
+    "license_status": "pendente",
+    "match_status": "candidato_visual_validar_acabamento",
+    "observations": "Modelo correspondente; acabamento turquesa da foto não foi especificado no cadastro. [Falha de download: HTTP Error 404: Not Found]",
+    "validated": false
+  },
+  {
+    "id": 132,
+    "name": "Ibanez RG550 Genesis Collection",
+    "image_path": "static/images/catalog/product_132.webp",
+    "source_url": "https://musikcentralen.se/ibanez-rg550-eb-electric-blue",
+    "image_url": "https://musikcentralen.se/content/images/thumbs/0064812_ibanez-rg550-eb-electric-blue.png",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_visual_validar_acabamento",
+    "observations": "Modelo RG550 Genesis; foto em Electric Blue, acabamento não especificado no cadastro.",
+    "validated": false
+  },
+  {
+    "id": 145,
+    "name": "Fender Stratocaster American Pro II",
+    "image_path": "static/images/catalog/product_145.webp",
+    "source_url": "https://www.chicagomusicexchange.com/products/fender-american-professional-ii-stratocaster-rosewood-neck-lake-placid-blue-1277661",
+    "image_url": "https://www.chicagomusicexchange.com/cdn/shop/products/fender-electric-guitars-solid-body-fender-american-professional-ii-stratocaster-rosewood-neck-lake-placid-blue-w-custom-shop-fat-50s-pickups-0113900702-29418047045767_2000x.jpg?v=1658762048",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_visual_validar_acabamento",
+    "observations": "Modelo correspondente; foto em Lake Placid Blue, acabamento não especificado no cadastro.",
+    "validated": false
+  },
+  {
+    "id": 131,
+    "name": "Gibson Les Paul Standard '50s",
+    "image_path": "static/images/catalog/product_131.webp",
+    "source_url": "https://www.tammerpianojasoitin.fi/Gibson-Les-Paul-Standard-50s-Gold-Top-1",
+    "image_url": "https://www.tammerpianojasoitin.fi/WebRoot/Capnova/Shops/17042015-9511/5D7A/59CB/4CB8/9331/F567/0A28/1011/0A74/gibson-les-paul-standard-50s-original-gold-top-1_ml.png",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_visual_validar_acabamento",
+    "observations": "Modelo correspondente; foto Gold Top, acabamento não especificado no cadastro.",
+    "validated": false
+  },
+  {
+    "id": 83,
+    "name": "Tagima Memphis AC-39 Nylon Natural",
+    "image_path": "static/images/catalog/product_83.webp",
+    "source_url": "https://www.brasiltronic.com.br/violao-acustico-tagima-ac39-memphis-nylon-natural-ac-39-nt",
+    "image_url": "https://images.tcdn.com.br/img/img_prod/1148871/violao_acustico_tagima_ac39_memphis_nylon_natural_1499_1_8c228270a71b8681d684dd32c09f5145.jpg",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento natural correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 87,
+    "name": "Yamaha F310 Aço Natural",
+    "image_path": "static/images/catalog/product_87.webp",
+    "source_url": "https://www.musicmanchester.com/products/yamaha-f310-6-strings-acoustic-guitar-natural",
+    "image_url": "https://cdn.shopaccino.com/music-manchester/products/yamaha-f310-6-strings-acoustic-guitar-natural-154059_m.jpg?v=681",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento natural correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 82,
+    "name": "Yamaha C70 Nylon Natural",
+    "image_path": "static/images/catalog/product_82.webp",
+    "source_url": "https://mahoganymusic.com.my/products/yamaha-c70-natural-finish-classical-guitar",
+    "image_url": "https://mahoganymusic.com.my/cdn/shop/products/c13vycrxyrpn31j5sx5i_1024x1024.jpg?v=1707593541",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento natural correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 114,
+    "name": "Yamaha CG162S Nylon Natural",
+    "image_path": "static/images/catalog/product_114.webp",
+    "source_url": "https://www.musicacenter.com.br/cordas/violoes/classico/violao-yamaha-classico-acustico-nylon-cg162s-natural",
+    "image_url": "https://images.tcdn.com.br/img/img_prod/1033692/violao_yamaha_classico_acustico_nylon_cg162s_natural_6477_2_abb213508620f233d1d2ebf8f78f3fbe_20210901140441.jpg",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento natural correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 104,
+    "name": "Yamaha APX600 Elétrico Aço Preto",
+    "image_path": "static/images/catalog/product_104.webp",
+    "source_url": "https://www.palaciodelamusica.com.uy/catalogo/guitarra-electroacustica-yamaha-apx600-negra_APX600BL_APX600BL",
+    "image_url": "https://f.fcdn.app/imgs/67865a/www.palaciodelamusica.com.uy/pmusuy/94b4/original/catalogo/APX600BL-APX600BL_1/2000-2000/guitarra-electroacustica-yamaha-apx600-negra-guitarra-electroacustica-yamaha-apx600-negra.jpg",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento preto correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 95,
+    "name": "Takamine GD20 Dreadnought Natural",
+    "image_path": "static/images/catalog/product_95.webp",
+    "source_url": "https://www.playmusic123.com/collections/guitars/products/takamine-gd20-dreadnought-acoustic-guitar-natural-satin-gd20",
+    "image_url": "https://www.playmusic123.com/cdn/shop/products/GD20_1024x1024.jpg?v=1625272733",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento natural correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 90,
+    "name": "Crafter HT-100 Folk Aço Natural",
+    "image_path": "static/images/catalog/product_90.webp",
+    "source_url": "https://www.polysound.ru/acoustic_guitars/crafter_ht-100op.n_akusticheskaya_gitara/",
+    "image_url": "https://www.polysound.ru/upload/iblock/03c/o_1dmp6aurt1sal1bb2t291fei1uc61a.jpg",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_validar_variante",
+    "observations": "HT-100 natural; a página usa a variante HT-100/OP.N. Conferir se corresponde à configuração cadastrada.",
+    "validated": true
+  },
+  {
+    "id": 94,
+    "name": "Taylor 110e Dreadnought Natural",
+    "image_path": "static/images/catalog/product_94.webp",
+    "source_url": "https://www.sweelee.com.my/products/taylor-110e-dreadnought-acoustic-guitar-w-bag",
+    "image_url": "https://www.sweelee.com.my/cdn/shop/products/products_2FT25-110-E_2FT25-110-E_1670232005690.jpg?v=1670232017&width=2048",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo 110e e visual natural correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 106,
+    "name": "Taylor 214ce Elétrico Aço Natural",
+    "image_path": "static/images/catalog/product_106.webp",
+    "source_url": "https://stevesmusic.com/products/taylor-guitars-214ce",
+    "image_url": "https://stevesmusic.com/cdn/shop/files/53206.jpg?v=1766561979&width=1000",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo 214ce correspondente; confirmar acabamento exato da unidade cadastrada.",
+    "validated": true
+  },
+  {
+    "id": 93,
+    "name": "Martin D-28 Dreadnought Natural",
+    "image_path": "static/images/catalog/product_93.webp",
+    "source_url": "https://megamusiconline.com.au/products/martin-d28-standard-series-dreadnought-acoustic-guitar",
+    "image_url": "https://megamusiconline.com.au/cdn/shop/files/40SS-D281.jpg?v=1774935507&width=1920",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo D-28 correspondente.",
+    "validated": true
+  },
+  {
+    "id": 116,
+    "name": "Kala KA-15S Soprano Mogno",
+    "image_path": "static/images/catalog/product_116.webp",
+    "source_url": "https://easymusiccenter.com/products/ka-15s",
+    "image_url": "https://easymusiccenter.com/cdn/shop/products/ka-15s_1606x.png?v=1597283153",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento mogno correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 117,
+    "name": "Ohana SK-10 Soprano Natural",
+    "image_path": "static/images/catalog/product_117.webp",
+    "source_url": "https://www.elderly.com/products/ohana-sk-10-soprano-ukulele-sk10s-nat",
+    "image_url": "https://www.elderly.com/cdn/shop/products/1_277663e4-e270-4ca3-8025-c0b0199db4da.jpg?v=1715657125&width=1600",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo e acabamento natural correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 118,
+    "name": "Kalani KAL-300S Soprano Natural",
+    "image_path": "static/images/catalog/product_118.webp",
+    "source_url": "https://www.refinado.com.br/instrumentos-musicais/instrumentos-de-cordas/ukulele/ukulele-soprano-kalani-kal-300-ss-kayke-series",
+    "image_url": "https://images.tcdn.com.br/img/img_prod/754260/ukulele_soprano_kalani_kal_300_ss_kayke_series_12091_1_b6413ca3beed7e2cfb5dfcd63bf260fb.jpg",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_validar_variante",
+    "observations": "Resultado encontrado como KAL-300 SS; confirmar se o sufixo SS é a mesma variante do cadastro KAL-300S.",
+    "validated": true
+  },
+  {
+    "id": 120,
+    "name": "Kala KA-C Concert Mogno",
+    "image_path": "static/images/catalog/product_120.webp",
+    "source_url": "https://spicersmusic.com/products/kala-mahogany-concert-ukulele",
+    "image_url": "https://spicersmusic.com/cdn/shop/products/kala-mahogany-concert-1.jpg?v=1599668707",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo KA-C Concert em mogno correspondente.",
+    "validated": true
+  },
+  {
+    "id": 124,
+    "name": "Kala KA-T Tenor Mogno",
+    "image_path": "static/images/catalog/product_124.webp",
+    "source_url": "https://www.sweetwater.com/store/detail/KA-TSatMAH--kala-ka-t-tenor-uke-natural-satin",
+    "image_url": "https://media.sweetwater.com/m/products/image/8b351aea2edJYK5GZYc4AFPwPzXk782lEvZsPHwy.jpg?canvas=1080%2C1080&fit=bounds&ha=8b351aea2eeed00a&height=1080&quality=82&width=1080",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_forte",
+    "observations": "Modelo KA-T e acabamento mogno correspondentes.",
+    "validated": true
+  },
+  {
+    "id": 121,
+    "name": "Ohana CK-20 Concert Natural",
+    "image_path": "static/images/catalog/product_121.webp",
+    "source_url": "https://ukesupply.de/products/ohana-solid-mahogany-mahogany-konzert-1",
+    "image_url": "https://ukesupply.de/cdn/shop/files/Ohana-CK-20-Konzert-Ukulele-Decke_700x700.jpg?v=1739978188",
+    "license_status": "referencia_editorial_pesquisa",
+    "match_status": "candidato_validar_acabamento",
+    "observations": "Imagem identificada no arquivo do produto CK-20; confirmar se o acabamento listado como natural coincide com o item físico.",
+    "validated": false
+  },
+  {
+    "id": 123,
+    "name": "Kala KA-SMHCE Concert Elétrico Mogno",
+    "image_path": null,
+    "source_url": "https://theukulelesite.com/kala-solid-wood-concert-cutaway-electric-ka-smhce-c.html",
+    "image_url": "https://theukulelesite.com/media/catalog/product/cache/580edda64d52f3a14f602a0ee49e0f07/k/a/kala_ka-smhce-c_1.jpg",
+    "license_status": "pendente",
+    "match_status": "candidato_validar_variante",
+    "observations": "Resultado encontrado como KA-SMHCE-C; confirmar sufixo/variante exata antes de publicar. [Falha de download: HTTP Error 403: Forbidden]",
+    "validated": false
+  }
+]

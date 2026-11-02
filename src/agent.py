@@ -9,7 +9,13 @@ from typing import Optional
 from google import genai
 from google.genai import types
 
-from src.config import GEMINI_API_KEY, GEMINI_MODEL, get_reference_date
+from src.config import (
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    get_current_datetime,
+    get_reference_date,
+    is_store_open,
+)
 from src.data_loader import DataStore
 from src.tools import (
     TOOL_DECLARATIONS,
@@ -111,11 +117,14 @@ SYSTEM_PROMPT = """Você é o assistente virtual da Empório da Música, uma loj
 - O cliente pode solicitar exclusão dos dados a qualquer momento.
 
 ## Fora do Expediente
-- Se a mensagem for enviada fora do horário de funcionamento, informe o horário de retorno.
+- Situação atual da loja: {store_status}
+- Se o atendimento ocorrer fora do horário de funcionamento (conforme indicado acima), informe educadamente ao cliente que a loja está fora do expediente e mencione o horário de retorno previsto.
 
-## Data de Referência
-- A data de hoje é: {reference_date}
-- Use esta data para calcular prazos de arrependimento e garantia.
+## Data e Hora de Referência
+- Data atual: {current_date} ({weekday_name})
+- Horário atual em Campo Grande/MS: {current_time}
+- Status do expediente: {store_status}
+- Use esta data e hora para calcular prazos de arrependimento, garantia e informações de expediente.
 """
 
 
@@ -129,12 +138,6 @@ class EmporioChatbot:
         self.store = store if store is not None else DataStore()
         self.history: list[dict] = []
 
-        # Build system prompt with current reference date
-        ref_date = get_reference_date()
-        self.system_prompt = SYSTEM_PROMPT.format(
-            reference_date=ref_date.strftime("%d/%m/%Y")
-        )
-
         # Map tool names to their implementations
         self._tool_map = {
             "search_products": lambda **kwargs: search_products(self.store, **kwargs),
@@ -142,6 +145,29 @@ class EmporioChatbot:
             "check_order_status": lambda **kwargs: check_order_status(self.store, **kwargs),
             "list_active_promotions": lambda **kwargs: list_active_promotions(self.store),
         }
+
+    @property
+    def system_prompt(self) -> str:
+        """Dynamically build the system prompt with current date, time and store status."""
+        dt = get_current_datetime()
+        weekdays_pt = [
+            "Segunda-feira",
+            "Terça-feira",
+            "Quarta-feira",
+            "Quinta-feira",
+            "Sexta-feira",
+            "Sábado",
+            "Domingo",
+        ]
+        weekday_name = weekdays_pt[dt.weekday()]
+        is_open, status_desc = is_store_open(dt)
+
+        return SYSTEM_PROMPT.format(
+            current_date=dt.strftime("%d/%m/%Y"),
+            current_time=dt.strftime("%H:%M"),
+            weekday_name=weekday_name,
+            store_status=status_desc,
+        )
 
     @property
     def client(self) -> genai.Client:

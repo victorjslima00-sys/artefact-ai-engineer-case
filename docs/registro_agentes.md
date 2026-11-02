@@ -43,3 +43,34 @@ Este arquivo registra a atuação dos agentes de IA no projeto com escopo, justi
 
 **Limites mantidos:** não li nem imprimi `.env`; não fiz chamada externa ao Gemini; não alterei `app.py`; não inicializei Git nem criei commits. A data real de entrega ainda não existe no CSV, portanto o cálculo permanece explicitamente provisório até a fonte de dados registrar essa data. A inconsistência do horário da loja fica para uma tarefa separada.
 
+---
+
+## 2026-11-02 — Antigravity — Conclusão das Pendências do Desafio Técnico
+
+**Escopo:**
+Resolução de pendências técnicas prioritárias do projeto:
+1. Inclusão completa das regras do manual de políticas no prompt do agente (`SYSTEM_PROMPT`).
+2. Inicialização preguiçosa do cliente Gemini para execução dos testes automatizados sem chave de API.
+3. Atualização e correção do `README.md` (URL do clone, estrutura de pastas real, descrição do prompt e instrução de testes).
+4. Suporte a horário dinâmico e fuso horário `America/Campo_Grande` no prompt do agente com verificação de expediente aberto/fechado e testes unitários.
+5. Regeração do Exemplo 4 (`examples/04_return_policy.md`) a partir de execução real do modelo sob `REFERENCE_DATE=2026-03-25`.
+6. Higienização de caminhos absolutos locais pessoais para privacidade.
+7. Otimização de busca por categoria em `src/tools.py` (plural/singular e acentuação) e injeção de `pix_price` e `max_installments` para produtos sem promoção ativa, com testes unitários.
+
+**Arquivos alterados:**
+- `src/agent.py`: políticas de frete, exceções de troca/devolução, encaminhamento de acessórios, injeção dinâmica de data/hora/expediente a cada mensagem, inicialização preguiçosa (`lazy client`).
+- `src/config.py`: inclusão de `STORE_TZ` (`America/Campo_Grande`), `get_current_datetime()` e `is_store_open()`.
+- `src/tools.py`: normalização fonética/acentos/plurais para categorias em `search_products`, cálculo de parcelas escalonadas (`_calculate_max_installments`) e cálculo de preço à vista PIX (-5% tabela) em `_product_summary`.
+- `README.md`: URL correta do repositório, atualização da árvore de diretórios, descrição fiel das políticas no prompt e comando pytest.
+- `examples/04_return_policy.md`: transcrição real do agente tratando elegibilidade provisória e confirmação de recebimento.
+- `scripts/export_catalog.py`: sanitização de caminhos absolutos locais.
+- `docs/registro_agentes.md`: sanitização de caminhos de ambiente e registro desta etapa.
+- `tests/test_store_schedule.py`: 7 testes de validação de horário comercial e regras de fim de semana.
+- `tests/test_tools_enhancements.py`: 4 testes de busca por categoria (singular/plural/acentos) e regras de PIX e parcelamento.
+
+**Verificações executadas:**
+- `GEMINI_API_KEY="" python -m pytest -q tests`: 19 passed em ~2.1s (100% dos testes passando sem chave de API).
+- Execuções reais com a API Gemini para os exemplos com validação de status de elegibilidade provisória.
+- Verificação de ausência de credenciais, force-push ou quebra de histórico.
+
+

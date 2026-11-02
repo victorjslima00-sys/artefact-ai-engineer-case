@@ -20,7 +20,7 @@ The agent uses a **hybrid architecture** that separates two types of knowledge:
 | Knowledge Type | How It's Accessed | Rationale |
 |---|---|---|
 | **Structured data** (products, orders, promotions, customers) | Function calling — the model decides which tool to invoke | Data changes frequently; queries need filtering, joins, and calculations |
-| **Policies** (returns, payments, warranties, business hours) | Full text in the system prompt | The policy manual is ~4,000 tokens (~8 pages) — small enough to fit entirely in context without retrieval overhead |
+| **Policies** (returns, payments, warranties, business hours) | Versão condensada e fiel do manual, com todas as regras operacionais no system prompt | O manual de políticas contém ~4.000 tokens — conciso o suficiente para caber integralmente no contexto sem overhead de recuperação |
 
 **Why not RAG?** The policy document is small enough that embedding + vector search would add infrastructure complexity (embeddings model, vector DB) without proportional benefit. If the manual grew to hundreds of pages, RAG would be justified.
 
@@ -69,11 +69,13 @@ The `REFERENCE_DATE` environment variable allows setting a custom date for testi
 ## 📁 Project Structure
 
 ```
-emporio-da-musica-chatbot/
-├── app.py                  # Streamlit chat interface
+artefact-ai-engineer-case/
+├── app.py                  # Streamlit UI
 ├── requirements.txt        # Python dependencies
 ├── .env.example            # Environment variables template
 ├── .gitignore
+├── .streamlit/             # Streamlit configuration
+│   └── config.toml
 ├── data/                   # Store data (CSVs + policy PDF)
 │   ├── desafio_tecnico_ai_eng - categories.csv
 │   ├── desafio_tecnico_ai_eng - customers.csv
@@ -86,14 +88,27 @@ emporio-da-musica-chatbot/
 │   ├── __init__.py
 │   ├── config.py           # Configuration & environment variables
 │   ├── data_loader.py      # Data loading, cleaning & DataStore class
+│   ├── image_helper.py     # Image helper utilities
+│   ├── image_resolver.py   # Product image resolver
 │   ├── tools.py            # Agent tools (function calling implementations)
 │   └── agent.py            # Chatbot agent with Gemini integration
-├── docs/
-│   ├── relacao_instrumentos.md   # Reference list of all 65 products
-│   └── registro_agentes.md      # Agent activity log
-├── tests/
-│   ├── test_order_return_eligibility.py  # Return window calculation tests
-│   └── test_realtime_stock_sync.py       # Real-time stock sync tests
+├── scripts/                # Utility scripts for catalog and images
+│   ├── export_catalog.py
+│   ├── fetch_catalog_images.py
+│   └── process_catalog_manifest.py
+├── static/                 # Static assets and catalog imagery
+│   └── images/
+├── docs/                   # Documentation and reference manifests
+│   ├── relacao_instrumentos.md
+│   ├── registro_agentes.md
+│   ├── emporio_catalogo_imagens_candidatas.csv
+│   ├── emporio_catalogo_imagens_candidatas.json
+│   ├── emporio_galeria_fotos_candidatas.html
+│   ├── emporio_relatorio_fotos_candidatas.md
+│   └── manifesto_imagens_local.json
+├── tests/                  # Automated test suite
+│   ├── test_order_return_eligibility.py
+│   └── test_realtime_stock_sync.py
 └── examples/               # Example conversations (5)
     ├── 01_catalog_query.md
     ├── 02_store_info.md
@@ -113,8 +128,8 @@ emporio-da-musica-chatbot/
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/emporio-da-musica-chatbot.git
-cd emporio-da-musica-chatbot
+git clone https://github.com/victorjslima00-sys/artefact-ai-engineer-case.git
+cd artefact-ai-engineer-case
 
 # Create and activate a virtual environment (recommended)
 python -m venv .venv
@@ -129,6 +144,14 @@ pip install -r requirements.txt
 # Configure environment
 cp .env.example .env
 # Edit .env and add your GEMINI_API_KEY
+```
+
+### Running Tests
+
+Execute the automated test suite without requiring an API key:
+
+```bash
+python -m pytest -q tests
 ```
 
 ### Running

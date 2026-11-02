@@ -73,4 +73,25 @@ Resolução de pendências técnicas prioritárias do projeto:
 - Execuções reais com a API Gemini para os exemplos com validação de status de elegibilidade provisória.
 - Verificação de ausência de credenciais, force-push ou quebra de histórico.
 
+---
+
+## 2026-11-02 — Antigravity — Refinamento de Prompt, Parcelamento e Documentação
+
+**Escopo:**
+1. Ajuste no `SYSTEM_PROMPT` (`src/agent.py`) proibindo prometer ações não executáveis e vazamento de termos internos das ferramentas.
+2. Inclusão de `max_installments` para produtos em promoção ativa em `src/tools.py`.
+3. Documentação no `README.md` da limitação de data de entrega informada pelo cliente.
+4. Regeração real de `examples/04_return_policy.md` garantindo linguagem natural e encaminhamento correto para a equipe.
+
+**Arquivos alterados:**
+- `src/agent.py`
+- `src/tools.py`
+- `README.md`
+- `examples/04_return_policy.md`
+- `docs/registro_agentes.md`
+
+**Verificações executadas:**
+- `GEMINI_API_KEY="" python -m pytest -q tests`: 19 passed.
+
+
 

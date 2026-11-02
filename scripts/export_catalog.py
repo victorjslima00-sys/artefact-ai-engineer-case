@@ -1,11 +1,11 @@
 import sys, os
-sys.path.insert(0, r'C:\Users\Victor Lima\.gemini\antigravity\scratch\emporio-da-musica-chatbot')
+sys.path.insert(0, r'.')
 from src.data_loader import DataStore
 
 store = DataStore()
 df = store.products.copy()
 
-output_path = r'C:\Users\Victor Lima\.gemini\antigravity\scratch\emporio-da-musica-chatbot\docs\relacao_instrumentos.md'
+output_path = r'.\docs\relacao_instrumentos.md'
 
 with open(output_path, 'w', encoding='utf-8') as f:
     f.write("# Relação Completa de Instrumentos — Empório da Música\n\n")

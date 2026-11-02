@@ -37,7 +37,7 @@ Este arquivo registra a atuação dos agentes de IA no projeto com escopo, justi
 - RED antes da correção: `test_return_window_starts_from_delivery_date` falhou como esperado (o código antigo retornava `False` usando `order_date`).
 - GREEN/regressão: `python -m unittest discover -s tests -v` — 5 testes passaram.
 - `python -m compileall -q app.py src tests` — passou.
-- Dependências de `requirements.txt` instaladas apenas em `C:/Users/Victor Lima/AppData/Local/hermes/cache/scratch/.venv-emporio`; `pip check` reportou `No broken requirements found`.
+- Dependências de `requirements.txt` instaladas apenas em ambiente virtual temporário fora do repositório; `pip check` reportou `No broken requirements found`.
 - Smoke test local: catálogo (12 violões até R$1.000), detalhes do Takamine GD20, 4 promoções e consulta de pedidos executaram com dados locais.
 - Streamlit `AppTest`: execução sem exceções. Chave temporária fictícia usada somente para inicializar o cliente; nenhuma chamada à API Gemini foi feita.
 
